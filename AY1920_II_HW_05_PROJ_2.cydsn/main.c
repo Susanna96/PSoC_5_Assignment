@@ -258,24 +258,25 @@ int main(void)
         error = I2C_Peripheral_ReadRegisterMulti(LIS3DH_DEVICE_ADDRESS,
                                                  LIS3DH_OUT_Z_L,2,
                                                  &accZ[0]);
-        if(error == NO_ERROR)
-        {
-            Out_accX = (int16)((accX[0] | (accX[1]<<8)))>>6;
-            Out_accX=Out_accX*4;   //scaling to mg (sensitivity=4mg/digit)
-            OutArray[1] = (uint8_t)(Out_accX & 0xFF);
-            OutArray[2] = (uint8_t)(Out_accX >> 8);
-            
-            Out_accY = (int16)((accY[0] | (accY[1]<<8)))>>6;
-            Out_accY=Out_accY*4;   //scaling to mg (sensitivity=4mg/digit)
-            OutArray[3] = (uint8_t)(Out_accY & 0xFF);
-            OutArray[4] = (uint8_t)(Out_accY >> 8);
-           
-            Out_accZ = (int16)((accZ[0] | (accZ[1]<<8)))>>6;
-            Out_accZ=Out_accZ*4;   //scaling to mg (sensitivity=4mg/digit)
-            OutArray[5] = (uint8_t)(Out_accZ & 0xFF);
-            OutArray[6] = (uint8_t)(Out_accZ >> 8);
-            
-        }    
+            if(error == NO_ERROR)
+            {
+                Out_accX = (int16)((accX[0] | (accX[1]<<8)))>>6;
+                Out_accX=Out_accX*4;   //scaling to mg (sensitivity=4mg/digit)
+                OutArray[1] = (uint8_t)(Out_accX & 0xFF);
+                OutArray[2] = (uint8_t)(Out_accX >> 8);
+                
+                Out_accY = (int16)((accY[0] | (accY[1]<<8)))>>6;
+                Out_accY=Out_accY*4;   //scaling to mg (sensitivity=4mg/digit)
+                OutArray[3] = (uint8_t)(Out_accY & 0xFF);
+                OutArray[4] = (uint8_t)(Out_accY >> 8);
+               
+                Out_accZ = (int16)((accZ[0] | (accZ[1]<<8)))>>6;
+                Out_accZ=Out_accZ*4;   //scaling to mg (sensitivity=4mg/digit)
+                OutArray[5] = (uint8_t)(Out_accZ & 0xFF);
+                OutArray[6] = (uint8_t)(Out_accZ >> 8);
+                
+                UART_Debug_PutArray(OutArray, 8);
+            }    
         }
     }
 }
