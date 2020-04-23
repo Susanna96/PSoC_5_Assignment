@@ -244,7 +244,22 @@ int main(void)
     
     for(;;)
     {
-        //TODO
+        CyDelay(100);
+        if(status_register & 3)
+        {
+        error = I2C_Peripheral_ReadRegisterMulti(LIS3DH_DEVICE_ADDRESS,
+                                                 LIS3DH_OUT_X_L,2,
+                                                 &accX[0]);
+        
+        error = I2C_Peripheral_ReadRegisterMulti(LIS3DH_DEVICE_ADDRESS,
+                                                 LIS3DH_OUT_Y_L,2,
+                                                 &accY[0]);
+        
+        error = I2C_Peripheral_ReadRegisterMulti(LIS3DH_DEVICE_ADDRESS,
+                                                 LIS3DH_OUT_Z_L,2,
+                                                 &accZ[0]);
+        
+        }
     }
 }
 
