@@ -266,6 +266,19 @@ int main(void)
                                                  LIS3DH_OUT_Z_L,2,
                                                  &accZ[0]);
         
+            if(error == NO_ERROR)
+            {
+                Out_accX = (int16)((accX[0] | (accX[1]<<8)))>>4;
+                Out_accX2= (float32)Out_accX*9.81*0.002;
+                
+                Out_accY = (int16)((accY[0] | (accY[1]<<8)))>>6;
+                Out_accY2= (float32)Out_accY*9.81*0.002;
+                
+                Out_accZ = (int16)((accZ[0] | (accZ[1]<<8)))>>6;
+                Out_accZ2= (float32)Out_accZ*9.81*0.002;
+                
+                
+            }    
         }
     }
 }
