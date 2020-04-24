@@ -61,6 +61,10 @@
 #define LIS3DH_OUT_Z_L 0x2C 
 #define LIS3DH_OUT_Z_H 0x2D 
 
+#define SENSITIVITY 0.002  // senitivity = 0.002g/digit
+#define G 9.81             //gravitational acceleration
+#define DECIMALS 10000      //to keep 4 decimal
+
 
 int main(void)
 {
@@ -274,10 +278,10 @@ int main(void)
                 Out_accX = (int16)((accX[0] | (accX[1]<<8)))>>4;
                 
                 /*cast to a floating point in m/s^2 units (sensitivity=2mg/digit)*/
-                Out_accX2= (float32)Out_accX*9.81*0.002;
+                Out_accX2= (float32)Out_accX*G*SENSITIVITY;
                 
                 /*multiplication by a factor of 10000 to keep 4 decimals and cast to a int32*/
-                interoX=(int32) (Out_accX2*10000);    
+                interoX=(int32) (Out_accX2*DECIMALS);    
                 
                 /*divide the int32 in 4 bytes */ 
                 OutArray[1]=(uint8_t)(interoX & 0xFF);
@@ -291,10 +295,10 @@ int main(void)
                 Out_accY = (int16)((accY[0] | (accY[1]<<8)))>>4;
                 
                 /*cast to a floating point in m/s^2 units (sensitivity=2mg/digit)*/
-                Out_accY2= (float32)Out_accY*9.81*0.002;
+                Out_accY2= (float32)Out_accY*G*SENSITIVITY;
                 
                 /*multiplication by a factor of 10000 to keep 4 decimals and cast to a int32*/
-                interoY=(int32) (Out_accY2*10000); 
+                interoY=(int32) (Out_accY2*DECIMALS); 
                 
                 /*divide the int32 in 4 bytes */
                 OutArray[5]=(uint8_t)(interoY & 0xFF);
@@ -308,10 +312,10 @@ int main(void)
                 Out_accZ = (int16)((accZ[0] | (accZ[1]<<8)))>>4;
                 
                 /*cast to a floating point in m/s^2 units (sensitivity=2mg/digit)*/
-                Out_accZ2= (float32)Out_accZ*9.81*0.002;
+                Out_accZ2= (float32)Out_accZ*G*SENSITIVITY;
                 
                 /*multiplication by a factor of 10000 to keep 4 decimals and cast to a int32*/
-                interoZ=(int32) (Out_accZ2*10000);
+                interoZ=(int32) (Out_accZ2*DECIMALS);
                 
                 /*divide the int32 in 4 bytes */
                 OutArray[9]=(uint8_t)(interoZ & 0xFF);
