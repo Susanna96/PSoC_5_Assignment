@@ -13,6 +13,7 @@
 #include "I2C_Interface.h"
 #include "project.h"
 #include "stdio.h"
+#include "InterruptRoutines.h"
 
 /**
 *   \brief 7-bit I2C address of the slave device.
@@ -61,7 +62,7 @@
 #define LIS3DH_OUT_Z_L 0x2C 
 #define LIS3DH_OUT_Z_H 0x2D 
 
-#define SENSITIVITY 4  //sensitivity = 4mg/digit
+#define SENSITIVITY 4       //sensitivity = 4mg/digit
 
 
 int main(void)
@@ -69,8 +70,12 @@ int main(void)
     CyGlobalIntEnable; /* Enable global interrupts. */
 
     /* Place your initialization/startup code here (e.g. MyInst_Start()) */
+    Timer_Start();
+    isr_ADC_StartEx(Custom_ISR_ADC);
     I2C_Peripheral_Start();
     UART_Debug_Start();
+    
+    flag_ISR=0;
     
     CyDelay(5); //"The boot procedure is complete about 5 milliseconds after device power-up."
     
@@ -109,8 +114,7 @@ int main(void)
     }
     
     /*      I2C Reading Status Register       */
-    
-    uint8_t status_register; 
+     
     error = I2C_Peripheral_ReadRegister(LIS3DH_DEVICE_ADDRESS,
                                         LIS3DH_STATUS_REG,
                                         &status_register);
@@ -246,8 +250,7 @@ int main(void)
     
     for(;;)
     {
-        CyDelay(100);
-        if(status_register & 3)
+        if(flag_ISR)
         {
         error = I2C_Peripheral_ReadRegisterMulti(LIS3DH_DEVICE_ADDRESS,
                                                  LIS3DH_OUT_X_L,2,
@@ -302,6 +305,7 @@ int main(void)
                 UART_Debug_PutArray(OutArray, 8);
             }    
         }
+        flag_ISR=0;
     }
 }
 
