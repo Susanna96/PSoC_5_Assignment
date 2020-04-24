@@ -254,28 +254,73 @@ int main(void)
         CyDelay(100);
         if(status_register & 3)
         {
-        error = I2C_Peripheral_ReadRegisterMulti(LIS3DH_DEVICE_ADDRESS,
-                                                 LIS3DH_OUT_X_L,2,
-                                                 &accX[0]);
-        
-       error = I2C_Peripheral_ReadRegisterMulti(LIS3DH_DEVICE_ADDRESS,
-                                                 LIS3DH_OUT_Y_L,2,
-                                                 &accY[0]);
-        
-        error = I2C_Peripheral_ReadRegisterMulti(LIS3DH_DEVICE_ADDRESS,
-                                                 LIS3DH_OUT_Z_L,2,
-                                                 &accZ[0]);
+            error = I2C_Peripheral_ReadRegisterMulti(LIS3DH_DEVICE_ADDRESS,
+                                                     LIS3DH_OUT_X_L,2,
+                                                     &accX[0]);
+            
+            error = I2C_Peripheral_ReadRegisterMulti(LIS3DH_DEVICE_ADDRESS,
+                                                     LIS3DH_OUT_Y_L,2,
+                                                     &accY[0]);
+            
+            error = I2C_Peripheral_ReadRegisterMulti(LIS3DH_DEVICE_ADDRESS,
+                                                     LIS3DH_OUT_Z_L,2,
+                                                     &accZ[0]);
         
             if(error == NO_ERROR)
             {
+                /******************************************/
+                /*               Acc_X                    */
+                /******************************************/
                 Out_accX = (int16)((accX[0] | (accX[1]<<8)))>>4;
+                
+                /*cast to a floating point in m/s^2 units (sensitivity=2mg/digit)*/
                 Out_accX2= (float32)Out_accX*9.81*0.002;
                 
-                Out_accY = (int16)((accY[0] | (accY[1]<<8)))>>6;
+                /*multiplication by a factor of 10000 to keep 4 decimals and cast to a int32*/
+                interoX=(int32) (Out_accX2*10000);    
+                
+                /*divide the int32 in 4 bytes */ 
+                OutArray[1]=(uint8_t)(interoX & 0xFF);
+                OutArray[2]=(uint8_t)((interoX >> 8)& 0xFF);
+                OutArray[3]=(uint8_t)((interoX >> 16)& 0xFF);
+                OutArray[4]=(uint8_t)(interoX >> 24);
+                
+                /******************************************/
+                /*               Acc_Y                    */
+                /******************************************/
+                Out_accY = (int16)((accY[0] | (accY[1]<<8)))>>4;
+                
+                /*cast to a floating point in m/s^2 units (sensitivity=2mg/digit)*/
                 Out_accY2= (float32)Out_accY*9.81*0.002;
                 
-                Out_accZ = (int16)((accZ[0] | (accZ[1]<<8)))>>6;
+                /*multiplication by a factor of 10000 to keep 4 decimals and cast to a int32*/
+                interoY=(int32) (Out_accY2*10000); 
+                
+                /*divide the int32 in 4 bytes */
+                OutArray[5]=(uint8_t)(interoY & 0xFF);
+                OutArray[6]=(uint8_t)((interoY >> 8)& 0xFF);
+                OutArray[7]=(uint8_t)((interoY >> 16)& 0xFF);
+                OutArray[8]=(uint8_t)(interoY >> 24);
+                
+                /******************************************/
+                /*               Acc_Z                    */
+                /******************************************/
+                Out_accZ = (int16)((accZ[0] | (accZ[1]<<8)))>>4;
+                
+                /*cast to a floating point in m/s^2 units (sensitivity=2mg/digit)*/
                 Out_accZ2= (float32)Out_accZ*9.81*0.002;
+                
+                /*multiplication by a factor of 10000 to keep 4 decimals and cast to a int32*/
+                interoZ=(int32) (Out_accZ2*10000);
+                
+                /*divide the int32 in 4 bytes */
+                OutArray[9]=(uint8_t)(interoZ & 0xFF);
+                OutArray[10]=(uint8_t)((interoZ >> 8)& 0xFF);
+                OutArray[11]=(uint8_t)((interoZ >> 16)& 0xFF);
+                OutArray[12]=(uint8_t)(interoZ >> 24);
+                
+                /*send bytes to be plotted to Bridge Contol Panel*/
+                UART_Debug_PutArray(OutArray, 14);
                 
                 
             }    
