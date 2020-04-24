@@ -62,7 +62,7 @@
 #define LIS3DH_OUT_Z_H 0x2D 
 
 #define SENSITIVITY 0.002  // senitivity = 0.002g/digit
-#define G 9.81             //gravitational acceleration
+#define G 9.81             //gravitational acceleration = 9.81 m/s^2
 #define DECIMALS 10000      //to keep 4 decimal
 
 
