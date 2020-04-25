@@ -1,4 +1,4 @@
-ARM GAS  C:\Users\Susanna\AppData\Local\Temp\ccY9P3xT.s 			page 1
+ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc775lSc.s 			page 1
 
 
    1              		.syntax unified
@@ -41,15 +41,13 @@ ARM GAS  C:\Users\Susanna\AppData\Local\Temp\ccY9P3xT.s 			page 1
   11:InterruptRoutines.c **** */
   12:InterruptRoutines.c **** //Include header
   13:InterruptRoutines.c **** #include "InterruptRoutines.h"
-  14:InterruptRoutines.c **** #include "I2C_Interface.h"
-  15:InterruptRoutines.c **** #include "stdio.h"
-  16:InterruptRoutines.c **** 
-  17:InterruptRoutines.c **** //Include required header files
-  18:InterruptRoutines.c **** #include "project.h"
-  19:InterruptRoutines.c **** 
-  20:InterruptRoutines.c **** CY_ISR(Custom_ISR_ADC)
-  21:InterruptRoutines.c **** {
-  28              		.loc 1 21 0
+  14:InterruptRoutines.c **** 
+  15:InterruptRoutines.c **** //Include required header files
+  16:InterruptRoutines.c **** #include "project.h"
+  17:InterruptRoutines.c **** 
+  18:InterruptRoutines.c **** CY_ISR(Custom_ISR_ADC)
+  19:InterruptRoutines.c **** {
+  28              		.loc 1 19 0
   29              		.cfi_startproc
   30              		@ args = 0, pretend = 0, frame = 0
   31              		@ frame_needed = 0, uses_anonymous_args = 0
@@ -57,16 +55,16 @@ ARM GAS  C:\Users\Susanna\AppData\Local\Temp\ccY9P3xT.s 			page 1
   33              		.cfi_def_cfa_offset 8
   34              		.cfi_offset 3, -8
   35              		.cfi_offset 14, -4
-  22:InterruptRoutines.c ****     Timer_ReadStatusRegister();
-ARM GAS  C:\Users\Susanna\AppData\Local\Temp\ccY9P3xT.s 			page 2
-
-
-  36              		.loc 1 22 0
+  20:InterruptRoutines.c ****     Timer_ReadStatusRegister();
+  36              		.loc 1 20 0
   37 0002 FFF7FEFF 		bl	Timer_ReadStatusRegister
+ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc775lSc.s 			page 2
+
+
   38              	.LVL0:
-  23:InterruptRoutines.c ****     
-  24:InterruptRoutines.c ****         flag_ISR=1; 
-  39              		.loc 1 24 0
+  21:InterruptRoutines.c ****     
+  22:InterruptRoutines.c ****     flag_ISR=1;  
+  39              		.loc 1 22 0
   40 0006 0122     		movs	r2, #1
   41 0008 014B     		ldr	r3, .L3
   42 000a 1A70     		strb	r2, [r3]
@@ -118,11 +116,11 @@ ARM GAS  C:\Users\Susanna\AppData\Local\Temp\ccY9P3xT.s 			page 1
   88 003c 07       		.byte	0x7
   89 003d 0E000000 		.4byte	.LASF3
   90 0041 03       		.uleb128 0x3
-ARM GAS  C:\Users\Susanna\AppData\Local\Temp\ccY9P3xT.s 			page 3
-
-
   91 0042 B6010000 		.4byte	.LASF9
   92 0046 02       		.byte	0x2
+ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc775lSc.s 			page 3
+
+
   93 0047 3F       		.byte	0x3f
   94 0048 4C000000 		.4byte	0x4c
   95 004c 02       		.uleb128 0x2
@@ -178,16 +176,16 @@ ARM GAS  C:\Users\Susanna\AppData\Local\Temp\ccY9P3xT.s 			page 1
  145 00a9 04       		.byte	0x4
  146 00aa AA010000 		.4byte	.LASF15
  147 00ae 02       		.uleb128 0x2
-ARM GAS  C:\Users\Susanna\AppData\Local\Temp\ccY9P3xT.s 			page 4
-
-
  148 00af 04       		.byte	0x4
  149 00b0 07       		.byte	0x7
+ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc775lSc.s 			page 4
+
+
  150 00b1 DF010000 		.4byte	.LASF16
  151 00b5 07       		.uleb128 0x7
  152 00b6 D0010000 		.4byte	.LASF22
  153 00ba 01       		.byte	0x1
- 154 00bb 14       		.byte	0x14
+ 154 00bb 12       		.byte	0x12
  155 00bc 00000000 		.4byte	.LFB64
  156 00c0 14000000 		.4byte	.LFE64-.LFB64
  157 00c4 01       		.uleb128 0x1
@@ -200,7 +198,7 @@ ARM GAS  C:\Users\Susanna\AppData\Local\Temp\ccY9P3xT.s 			page 1
  164 00d4 09       		.uleb128 0x9
  165 00d5 2E000000 		.4byte	.LASF17
  166 00d9 05       		.byte	0x5
- 167 00da 1A       		.byte	0x1a
+ 167 00da 17       		.byte	0x17
  168 00db A2000000 		.4byte	0xa2
  169 00df 05       		.uleb128 0x5
  170 00e0 03       		.byte	0x3
@@ -238,11 +236,11 @@ ARM GAS  C:\Users\Susanna\AppData\Local\Temp\ccY9P3xT.s 			page 1
  202 000f 10       		.uleb128 0x10
  203 0010 17       		.uleb128 0x17
  204 0011 00       		.byte	0
-ARM GAS  C:\Users\Susanna\AppData\Local\Temp\ccY9P3xT.s 			page 5
-
-
  205 0012 00       		.byte	0
  206 0013 02       		.uleb128 0x2
+ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc775lSc.s 			page 5
+
+
  207 0014 24       		.uleb128 0x24
  208 0015 00       		.byte	0
  209 0016 0B       		.uleb128 0xb
@@ -298,11 +296,11 @@ ARM GAS  C:\Users\Susanna\AppData\Local\Temp\ccY9P3xT.s 			page 1
  259 0048 00       		.byte	0
  260 0049 00       		.byte	0
  261 004a 07       		.uleb128 0x7
-ARM GAS  C:\Users\Susanna\AppData\Local\Temp\ccY9P3xT.s 			page 6
-
-
  262 004b 2E       		.uleb128 0x2e
  263 004c 01       		.byte	0x1
+ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc775lSc.s 			page 6
+
+
  264 004d 3F       		.uleb128 0x3f
  265 004e 19       		.uleb128 0x19
  266 004f 03       		.uleb128 0x3
@@ -358,11 +356,11 @@ ARM GAS  C:\Users\Susanna\AppData\Local\Temp\ccY9P3xT.s 			page 1
  316 0084 0E       		.uleb128 0xe
  317 0085 3A       		.uleb128 0x3a
  318 0086 0B       		.uleb128 0xb
-ARM GAS  C:\Users\Susanna\AppData\Local\Temp\ccY9P3xT.s 			page 7
-
-
  319 0087 3B       		.uleb128 0x3b
  320 0088 05       		.uleb128 0x5
+ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc775lSc.s 			page 7
+
+
  321 0089 49       		.uleb128 0x49
  322 008a 13       		.uleb128 0x13
  323 008b 3F       		.uleb128 0x3f
@@ -418,11 +416,11 @@ ARM GAS  C:\Users\Susanna\AppData\Local\Temp\ccY9P3xT.s 			page 1
  369 0000 6C6F6E67 		.ascii	"long long int\000"
  369      206C6F6E 
  369      6720696E 
-ARM GAS  C:\Users\Susanna\AppData\Local\Temp\ccY9P3xT.s 			page 8
-
-
  369      7400
  370              	.LASF3:
+ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc775lSc.s 			page 8
+
+
  371 000e 73686F72 		.ascii	"short unsigned int\000"
  371      7420756E 
  371      7369676E 
@@ -478,11 +476,11 @@ ARM GAS  C:\Users\Susanna\AppData\Local\Temp\ccY9P3xT.s 			page 1
  389      74696E65 
  389      732E6300 
  390              	.LASF21:
-ARM GAS  C:\Users\Susanna\AppData\Local\Temp\ccY9P3xT.s 			page 9
-
-
  391 0117 433A5C55 		.ascii	"C:\\Users\\Susanna\\Desktop\\psoc03\\PSoC_03\\AY192"
  391      73657273 
+ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc775lSc.s 			page 9
+
+
  391      5C537573 
  391      616E6E61 
  391      5C446573 
@@ -538,11 +536,11 @@ ARM GAS  C:\Users\Susanna\AppData\Local\Temp\ccY9P3xT.s 			page 1
  414      7400
  415              	.LASF22:
  416 01d0 43757374 		.ascii	"Custom_ISR_ADC\000"
-ARM GAS  C:\Users\Susanna\AppData\Local\Temp\ccY9P3xT.s 			page 10
-
-
  416      6F6D5F49 
  416      53525F41 
+ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc775lSc.s 			page 10
+
+
  416      444300
  417              	.LASF16:
  418 01df 73697A65 		.ascii	"sizetype\000"

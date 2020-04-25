@@ -20,9 +20,6 @@
     
     #define DATA_AVAILABLE 0x08 //bit 4 of status register is 1 when new data is available
     
-    #define LIS3DH_DEVICE_ADDRESS 0x18 //7-bit I2C address of the slave device
-    #define LIS3DH_STATUS_REG 0x27 //Address of the Status register
-    
     volatile uint8 flag_ISR;
     
 #endif

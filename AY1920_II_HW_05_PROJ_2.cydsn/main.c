@@ -22,7 +22,9 @@
 */
 #define LIS3DH_WHO_AM_I_REG_ADDR 0x0F
 
+#define LIS3DH_DEVICE_ADDRESS 0x18 //7-bit I2C address of the slave device
 
+#define LIS3DH_STATUS_REG 0x27 //Address of the Status register
 
 /**
 *   \brief Address of the Control register 1
@@ -258,48 +260,48 @@ int main(void)
                                                  &acc[0]);
         
        
-            if(error == NO_ERROR)
-            {
-                /******************************************/
-                /*               Acc_X                    */
-                /******************************************/
-                Out_accX = (int16)((acc[0] | (acc[1]<<8)))>>6;
-                
-                /*scaling to mg (sensitivity=4mg/digit)*/
-                Out_accX=Out_accX*SENSITIVITY;
-                
-                /*divide the int16 in 2 bytes*/
-                OutArray[1] = (uint8_t)(Out_accX & 0xFF);
-                OutArray[2] = (uint8_t)(Out_accX >> 8);
-                
-                /******************************************/
-                /*               Acc_Y                    */
-                /******************************************/
-                Out_accY = (int16)((acc[2] | (acc[3]<<8)))>>6;
-                
-                 /*scaling to mg (sensitivity=4mg/digit)*/
-                Out_accY=Out_accY*SENSITIVITY;  
-                
-                /*divide the int16 in 2 bytes*/
-                OutArray[3] = (uint8_t)(Out_accY & 0xFF);
-                OutArray[4] = (uint8_t)(Out_accY >> 8);
-               
-                /******************************************/
-                /*               Acc_Z                    */
-                /******************************************/
-                Out_accZ = (int16)((acc[4] | (acc[5]<<8)))>>6;
-                
-                 /*scaling to mg (sensitivity=4mg/digit)*/
-                Out_accZ=Out_accZ*SENSITIVITY;  
-                
-                /*divide the int16 in 2 bytes*/
-                OutArray[5] = (uint8_t)(Out_accZ & 0xFF);
-                OutArray[6] = (uint8_t)(Out_accZ >> 8);
-                
-                /*send bytes to be plotted to Bridge Contol Panel*/
-                UART_Debug_PutArray(OutArray, 8);
-            }    
-        }
+                if(error == NO_ERROR)
+                {
+                    /******************************************/
+                    /*               Acc_X                    */
+                    /******************************************/
+                    Out_accX = (int16)((acc[0] | (acc[1]<<8)))>>6;
+                    
+                    /*scaling to mg (sensitivity=4mg/digit)*/
+                    Out_accX=Out_accX*SENSITIVITY;
+                    
+                    /*divide the int16 in 2 bytes*/
+                    OutArray[1] = (uint8_t)(Out_accX & 0xFF);
+                    OutArray[2] = (uint8_t)(Out_accX >> 8);
+                    
+                    /******************************************/
+                    /*               Acc_Y                    */
+                    /******************************************/
+                    Out_accY = (int16)((acc[2] | (acc[3]<<8)))>>6;
+                    
+                     /*scaling to mg (sensitivity=4mg/digit)*/
+                    Out_accY=Out_accY*SENSITIVITY;  
+                    
+                    /*divide the int16 in 2 bytes*/
+                    OutArray[3] = (uint8_t)(Out_accY & 0xFF);
+                    OutArray[4] = (uint8_t)(Out_accY >> 8);
+                   
+                    /******************************************/
+                    /*               Acc_Z                    */
+                    /******************************************/
+                    Out_accZ = (int16)((acc[4] | (acc[5]<<8)))>>6;
+                    
+                     /*scaling to mg (sensitivity=4mg/digit)*/
+                    Out_accZ=Out_accZ*SENSITIVITY;  
+                    
+                    /*divide the int16 in 2 bytes*/
+                    OutArray[5] = (uint8_t)(Out_accZ & 0xFF);
+                    OutArray[6] = (uint8_t)(Out_accZ >> 8);
+                    
+                    /*send bytes to be plotted to Bridge Contol Panel*/
+                    UART_Debug_PutArray(OutArray, 8);
+                }    
+            }
         }
         flag_ISR=0;
     }
