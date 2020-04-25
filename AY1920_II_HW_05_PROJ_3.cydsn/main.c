@@ -13,6 +13,7 @@
 #include "I2C_Interface.h"
 #include "project.h"
 #include "stdio.h"
+#include "InterruptRoutines.h"
 
 /**
 *   \brief 7-bit I2C address of the slave device.
@@ -35,9 +36,9 @@
 #define LIS3DH_CTRL_REG1 0x20
 
 /**
-*   \brief Hex value to set HR mode and data rate selection to the accelerator
+*   \brief Hex value to set normal mode to the accelerator
 */
-#define LIS3DH_HR_MODE_CTRL_REG1 0x57  //100 Hz
+#define LIS3DH_NORMAL_MODE_CTRL_REG1 0x57  //Normal mode, 100 Hz
 
 
 
@@ -47,9 +48,9 @@
 #define LIS3DH_CTRL_REG4 0x23
 
 /**
-*   \brief Hex value to set HR mode and FSR
+*   \brief Hex value to set the FSR and activate the BDU
 */
-#define LIS3DH_CTRL_REG4_BDU_ACTIVE 0x98 //High resolution mode, [-4.0g, +4.0g] FSR
+#define LIS3DH_CTRL_REG4_BDU_ACTIVE 0x98 // [-2.0g, +2.0g] FSR
 
 /**
 *   \brief Addresses of the Output registers 
@@ -61,8 +62,8 @@
 #define LIS3DH_OUT_Z_L 0x2C 
 #define LIS3DH_OUT_Z_H 0x2D 
 
-#define SENSITIVITY 0.002  // senitivity = 0.002g/digit
-#define G 9.81             //gravitational acceleration = 9.81 m/s^2
+#define SENSITIVITY 0.002   // senitivity = 0.002g/digit
+#define G 9.81              //gravitational acceleration = 9.81 m/s^2
 #define DECIMALS 10000      //to keep 4 decimal
 
 
@@ -71,8 +72,12 @@ int main(void)
     CyGlobalIntEnable; /* Enable global interrupts. */
 
     /* Place your initialization/startup code here (e.g. MyInst_Start()) */
+    Timer_Start();
+    isr_ADC_StartEx(Custom_ISR_ADC);
     I2C_Peripheral_Start();
     UART_Debug_Start();
+    
+    flag_ISR=0;
     
     CyDelay(5); //"The boot procedure is complete about 5 milliseconds after device power-up."
     
@@ -111,8 +116,8 @@ int main(void)
     }
     
     /*      I2C Reading Status Register       */
-    
-    uint8_t status_register; 
+     
+    uint8_t status_register;
     error = I2C_Peripheral_ReadRegister(LIS3DH_DEVICE_ADDRESS,
                                         LIS3DH_STATUS_REG,
                                         &status_register);
@@ -152,9 +157,9 @@ int main(void)
         
     UART_Debug_PutString("\r\nWriting new values..\r\n");
     
-    if (ctrl_reg1 != LIS3DH_HR_MODE_CTRL_REG1)
+    if (ctrl_reg1 != LIS3DH_NORMAL_MODE_CTRL_REG1)
     {
-        ctrl_reg1 = LIS3DH_HR_MODE_CTRL_REG1;
+        ctrl_reg1 = LIS3DH_NORMAL_MODE_CTRL_REG1;
     
         error = I2C_Peripheral_WriteRegister(LIS3DH_DEVICE_ADDRESS,
                                              LIS3DH_CTRL_REG1,
@@ -242,9 +247,7 @@ int main(void)
     uint8_t header = 0xA0;
     uint8_t footer = 0xC0;
     uint8_t OutArray[14]; 
-    uint8_t accX[2];
-    uint8_t accY[2];
-    uint8_t accZ[2];
+    uint8_t acc[6];
     
     int32 interoX;
     int32 interoY;
@@ -255,80 +258,81 @@ int main(void)
     
     for(;;)
     {
-        CyDelay(100);
-        if(status_register & 3)
-        {
-            error = I2C_Peripheral_ReadRegisterMulti(LIS3DH_DEVICE_ADDRESS,
-                                                     LIS3DH_OUT_X_L,2,
-                                                     &accX[0]);
+        if(flag_ISR)
+        { 
+            error=I2C_Peripheral_ReadRegister(LIS3DH_DEVICE_ADDRESS,
+                                        LIS3DH_STATUS_REG,
+                                        &status_register);
             
-            error = I2C_Peripheral_ReadRegisterMulti(LIS3DH_DEVICE_ADDRESS,
-                                                     LIS3DH_OUT_Y_L,2,
-                                                     &accY[0]);
-            
-            error = I2C_Peripheral_ReadRegisterMulti(LIS3DH_DEVICE_ADDRESS,
-                                                     LIS3DH_OUT_Z_L,2,
-                                                     &accZ[0]);
-        
-            if(error == NO_ERROR)
+            if ((error == NO_ERROR) && ((status_register) & (DATA_AVAILABLE)))
             {
-                /******************************************/
-                /*               Acc_X                    */
-                /******************************************/
-                Out_accX = (int16)((accX[0] | (accX[1]<<8)))>>4;
-                
-                /*cast to a floating point in m/s^2 units (sensitivity=2mg/digit)*/
-                Out_accX2= (float32)Out_accX*G*SENSITIVITY;
-                
-                /*multiplication by a factor of 10000 to keep 4 decimals and cast to a int32*/
-                interoX=(int32) (Out_accX2*DECIMALS);    
-                
-                /*divide the int32 in 4 bytes */ 
-                OutArray[1]=(uint8_t)(interoX & 0xFF);
-                OutArray[2]=(uint8_t)((interoX >> 8)& 0xFF);
-                OutArray[3]=(uint8_t)((interoX >> 16)& 0xFF);
-                OutArray[4]=(uint8_t)(interoX >> 24);
-                
-                /******************************************/
-                /*               Acc_Y                    */
-                /******************************************/
-                Out_accY = (int16)((accY[0] | (accY[1]<<8)))>>4;
-                
-                /*cast to a floating point in m/s^2 units (sensitivity=2mg/digit)*/
-                Out_accY2= (float32)Out_accY*G*SENSITIVITY;
-                
-                /*multiplication by a factor of 10000 to keep 4 decimals and cast to a int32*/
-                interoY=(int32) (Out_accY2*DECIMALS); 
-                
-                /*divide the int32 in 4 bytes */
-                OutArray[5]=(uint8_t)(interoY & 0xFF);
-                OutArray[6]=(uint8_t)((interoY >> 8)& 0xFF);
-                OutArray[7]=(uint8_t)((interoY >> 16)& 0xFF);
-                OutArray[8]=(uint8_t)(interoY >> 24);
-                
-                /******************************************/
-                /*               Acc_Z                    */
-                /******************************************/
-                Out_accZ = (int16)((accZ[0] | (accZ[1]<<8)))>>4;
-                
-                /*cast to a floating point in m/s^2 units (sensitivity=2mg/digit)*/
-                Out_accZ2= (float32)Out_accZ*G*SENSITIVITY;
-                
-                /*multiplication by a factor of 10000 to keep 4 decimals and cast to a int32*/
-                interoZ=(int32) (Out_accZ2*DECIMALS);
-                
-                /*divide the int32 in 4 bytes */
-                OutArray[9]=(uint8_t)(interoZ & 0xFF);
-                OutArray[10]=(uint8_t)((interoZ >> 8)& 0xFF);
-                OutArray[11]=(uint8_t)((interoZ >> 16)& 0xFF);
-                OutArray[12]=(uint8_t)(interoZ >> 24);
-                
-                /*send bytes to be plotted to Bridge Contol Panel*/
-                UART_Debug_PutArray(OutArray, 14);
-                
-                
-            }    
+             
+            error = I2C_Peripheral_ReadRegisterMulti(LIS3DH_DEVICE_ADDRESS,
+                                                 LIS3DH_OUT_X_L,6,
+                                                 &acc[0]);
+        
+       
+                if(error == NO_ERROR)
+                {
+                    /******************************************/
+                    /*               Acc_X                    */
+                    /******************************************/
+                    Out_accX = (int16)((acc[0] | (acc[1]<<8)))>>4;
+                    
+                    /*cast to a floating point in m/s^2 units (sensitivity=2mg/digit)*/
+                    Out_accX2= (float32)Out_accX*G*SENSITIVITY;
+                    
+                    /*multiplication by a factor of 10000 to keep 4 decimals and cast to a int32*/
+                    interoX=(int32) (Out_accX2*DECIMALS);    
+                    
+                    /*divide the int32 in 4 bytes */ 
+                    OutArray[1]=(uint8_t)(interoX & 0xFF);
+                    OutArray[2]=(uint8_t)((interoX >> 8)& 0xFF);
+                    OutArray[3]=(uint8_t)((interoX >> 16)& 0xFF);
+                    OutArray[4]=(uint8_t)(interoX >> 24);
+                    
+                    /******************************************/
+                    /*               Acc_Y                    */
+                    /******************************************/
+                    Out_accY = (int16)((acc[2] | (acc[3]<<8)))>>4;
+                    
+                    /*cast to a floating point in m/s^2 units (sensitivity=2mg/digit)*/
+                    Out_accY2= (float32)Out_accY*G*SENSITIVITY;
+                    
+                    /*multiplication by a factor of 10000 to keep 4 decimals and cast to a int32*/
+                    interoY=(int32) (Out_accY2*DECIMALS); 
+                    
+                    /*divide the int32 in 4 bytes */
+                    OutArray[5]=(uint8_t)(interoY & 0xFF);
+                    OutArray[6]=(uint8_t)((interoY >> 8)& 0xFF);
+                    OutArray[7]=(uint8_t)((interoY >> 16)& 0xFF);
+                    OutArray[8]=(uint8_t)(interoY >> 24);
+                    
+                    /******************************************/
+                    /*               Acc_Z                    */
+                    /******************************************/
+                    Out_accZ = (int16)((acc[4] | (acc[5]<<8)))>>4;
+                    
+                    /*cast to a floating point in m/s^2 units (sensitivity=2mg/digit)*/
+                    Out_accZ2= (float32)Out_accZ*G*SENSITIVITY;
+                    
+                    /*multiplication by a factor of 10000 to keep 4 decimals and cast to a int32*/
+                    interoZ=(int32) (Out_accZ2*DECIMALS);
+                    
+                    /*divide the int32 in 4 bytes */
+                    OutArray[9]=(uint8_t)(interoZ & 0xFF);
+                    OutArray[10]=(uint8_t)((interoZ >> 8)& 0xFF);
+                    OutArray[11]=(uint8_t)((interoZ >> 16)& 0xFF);
+                    OutArray[12]=(uint8_t)(interoZ >> 24);
+                    
+                    /*send bytes to be plotted to Bridge Contol Panel*/
+                    UART_Debug_PutArray(OutArray, 14);
+                    
+                    
+                }
+            }
         }
+        flag_ISR=0;
     }
 }
 
