@@ -15,20 +15,14 @@
 #include "stdio.h"
 #include "InterruptRoutines.h"
 
-/**
-*   \brief 7-bit I2C address of the slave device.
-*/
-#define LIS3DH_DEVICE_ADDRESS 0x18
+
 
 /**
 *   \brief Address of the WHO AM I register
 */
 #define LIS3DH_WHO_AM_I_REG_ADDR 0x0F
 
-/**
-*   \brief Address of the Status register
-*/
-#define LIS3DH_STATUS_REG 0x27
+
 
 /**
 *   \brief Address of the Control register 1
@@ -115,6 +109,7 @@ int main(void)
     
     /*      I2C Reading Status Register       */
      
+    uint8_t status_register;
     error = I2C_Peripheral_ReadRegister(LIS3DH_DEVICE_ADDRESS,
                                         LIS3DH_STATUS_REG,
                                         &status_register);
@@ -241,9 +236,8 @@ int main(void)
     uint8_t header = 0xA0;
     uint8_t footer = 0xC0;
     uint8_t OutArray[8]; 
-    uint8_t accX[2];
-    uint8_t accY[2];
-    uint8_t accZ[2];
+    uint8_t acc[6];
+    
     
     OutArray[0] = header;
     OutArray[7] = footer;
@@ -251,24 +245,25 @@ int main(void)
     for(;;)
     {
         if(flag_ISR)
-        {
-        error = I2C_Peripheral_ReadRegisterMulti(LIS3DH_DEVICE_ADDRESS,
-                                                 LIS3DH_OUT_X_L,2,
-                                                 &accX[0]);
+        { 
+            error=I2C_Peripheral_ReadRegister(LIS3DH_DEVICE_ADDRESS,
+                                        LIS3DH_STATUS_REG,
+                                        &status_register);
+            
+            if ((error == NO_ERROR) && ((status_register) & (DATA_AVAILABLE)))
+            {
+             
+            error = I2C_Peripheral_ReadRegisterMulti(LIS3DH_DEVICE_ADDRESS,
+                                                 LIS3DH_OUT_X_L,6,
+                                                 &acc[0]);
         
-        error = I2C_Peripheral_ReadRegisterMulti(LIS3DH_DEVICE_ADDRESS,
-                                                 LIS3DH_OUT_Y_L,2,
-                                                 &accY[0]);
-        
-        error = I2C_Peripheral_ReadRegisterMulti(LIS3DH_DEVICE_ADDRESS,
-                                                 LIS3DH_OUT_Z_L,2,
-                                                 &accZ[0]);
+       
             if(error == NO_ERROR)
             {
                 /******************************************/
                 /*               Acc_X                    */
                 /******************************************/
-                Out_accX = (int16)((accX[0] | (accX[1]<<8)))>>6;
+                Out_accX = (int16)((acc[0] | (acc[1]<<8)))>>6;
                 
                 /*scaling to mg (sensitivity=4mg/digit)*/
                 Out_accX=Out_accX*SENSITIVITY;
@@ -280,7 +275,7 @@ int main(void)
                 /******************************************/
                 /*               Acc_Y                    */
                 /******************************************/
-                Out_accY = (int16)((accY[0] | (accY[1]<<8)))>>6;
+                Out_accY = (int16)((acc[2] | (acc[3]<<8)))>>6;
                 
                  /*scaling to mg (sensitivity=4mg/digit)*/
                 Out_accY=Out_accY*SENSITIVITY;  
@@ -292,7 +287,7 @@ int main(void)
                 /******************************************/
                 /*               Acc_Z                    */
                 /******************************************/
-                Out_accZ = (int16)((accZ[0] | (accZ[1]<<8)))>>6;
+                Out_accZ = (int16)((acc[4] | (acc[5]<<8)))>>6;
                 
                  /*scaling to mg (sensitivity=4mg/digit)*/
                 Out_accZ=Out_accZ*SENSITIVITY;  
@@ -304,6 +299,7 @@ int main(void)
                 /*send bytes to be plotted to Bridge Contol Panel*/
                 UART_Debug_PutArray(OutArray, 8);
             }    
+        }
         }
         flag_ISR=0;
     }

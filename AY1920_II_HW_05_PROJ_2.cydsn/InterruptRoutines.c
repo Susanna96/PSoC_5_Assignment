@@ -11,6 +11,8 @@
 */
 //Include header
 #include "InterruptRoutines.h"
+#include "I2C_Interface.h"
+#include "stdio.h"
 
 //Include required header files
 #include "project.h"
@@ -19,10 +21,9 @@ CY_ISR(Custom_ISR_ADC)
 {
     Timer_ReadStatusRegister();
     
-    if (status_register & DATA_AVAILABLE)
-        {
         flag_ISR=1; 
-        }
+        
+    
     
 }   
 
