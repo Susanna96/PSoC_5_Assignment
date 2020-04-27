@@ -22,9 +22,15 @@
 */
 #define LIS3DH_WHO_AM_I_REG_ADDR 0x0F
 
-#define LIS3DH_DEVICE_ADDRESS 0x18 //7-bit I2C address of the slave device
+/**
+*   \brief 7-bit I2C address of the slave device.
+*/
+#define LIS3DH_DEVICE_ADDRESS 0x18
 
-#define LIS3DH_STATUS_REG 0x27 //Address of the Status register
+/**
+*   \brief Address of the Status register
+*/
+#define LIS3DH_STATUS_REG 0x27
 
 /**
 *   \brief Address of the Control register 1
@@ -46,7 +52,7 @@
 /**
 *   \brief Hex value to set the FSR and activate the BDU
 */
-#define LIS3DH_CTRL_REG4_BDU_ACTIVE 0x80 // [-2.0g, +2.0g] FSR
+#define LIS3DH_CTRL_REG4_BDU_ACTIVE 0x80 // [-2.0g, +2.0g] FSR, BDU active
 
 /**
 *   \brief Addresses of the Output registers 
@@ -71,7 +77,7 @@ int main(void)
     I2C_Peripheral_Start();
     UART_Debug_Start();
     
-    flag_ISR=0;
+    flag_ISR=0; //flag_ISR initialization
     
     CyDelay(5); //"The boot procedure is complete about 5 milliseconds after device power-up."
     

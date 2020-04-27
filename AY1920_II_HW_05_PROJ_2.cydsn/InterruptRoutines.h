@@ -18,7 +18,7 @@
     
     CY_ISR_PROTO(Custom_ISR_ADC);
     
-    #define DATA_AVAILABLE 0x08 //bit 4 of status register is 1 when new data is available
+    #define DATA_AVAILABLE 0x08 //bit 3 of status register is 1 when new data is available
     
     volatile uint8 flag_ISR;
     

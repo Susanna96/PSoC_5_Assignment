@@ -38,7 +38,7 @@
 /**
 *   \brief Hex value to set normal mode to the accelerator
 */
-#define LIS3DH_NORMAL_MODE_CTRL_REG1 0x57  //Normal mode, 100 Hz
+#define LIS3DH_HR_MODE_CTRL_REG1 0x57  //High resolution mode, 100 Hz
 
 
 
@@ -50,7 +50,7 @@
 /**
 *   \brief Hex value to set the FSR and activate the BDU
 */
-#define LIS3DH_CTRL_REG4_BDU_ACTIVE 0x98 // [-2.0g, +2.0g] FSR
+#define LIS3DH_CTRL_REG4_BDU_ACTIVE 0x98 // [-4.0g, +4.0g] FSR, BDU active
 
 /**
 *   \brief Addresses of the Output registers 
@@ -64,7 +64,7 @@
 
 #define SENSITIVITY 0.002   // senitivity = 0.002g/digit
 #define G 9.81              //gravitational acceleration = 9.81 m/s^2
-#define DECIMALS 10000      //to keep 4 decimal
+#define DECIMALS 10000      //multiplication factor to keep 4 decimals
 
 
 int main(void)
@@ -77,7 +77,7 @@ int main(void)
     I2C_Peripheral_Start();
     UART_Debug_Start();
     
-    flag_ISR=0;
+    flag_ISR=0; //initialization of flag_ISR
     
     CyDelay(5); //"The boot procedure is complete about 5 milliseconds after device power-up."
     
@@ -157,9 +157,9 @@ int main(void)
         
     UART_Debug_PutString("\r\nWriting new values..\r\n");
     
-    if (ctrl_reg1 != LIS3DH_NORMAL_MODE_CTRL_REG1)
+    if (ctrl_reg1 != LIS3DH_HR_MODE_CTRL_REG1)
     {
-        ctrl_reg1 = LIS3DH_NORMAL_MODE_CTRL_REG1;
+        ctrl_reg1 = LIS3DH_HR_MODE_CTRL_REG1;
     
         error = I2C_Peripheral_WriteRegister(LIS3DH_DEVICE_ADDRESS,
                                              LIS3DH_CTRL_REG1,
@@ -282,7 +282,7 @@ int main(void)
                     /*cast to a floating point in m/s^2 units (sensitivity=2mg/digit)*/
                     Out_accX2= (float32)Out_accX*G*SENSITIVITY;
                     
-                    /*multiplication by a factor of 10000 to keep 4 decimals and cast to a int32*/
+                    /*multiplication by a factor of 10000 to keep 4 decimals and cast to int32*/
                     interoX=(int32) (Out_accX2*DECIMALS);    
                     
                     /*divide the int32 in 4 bytes */ 
@@ -299,7 +299,7 @@ int main(void)
                     /*cast to a floating point in m/s^2 units (sensitivity=2mg/digit)*/
                     Out_accY2= (float32)Out_accY*G*SENSITIVITY;
                     
-                    /*multiplication by a factor of 10000 to keep 4 decimals and cast to a int32*/
+                    /*multiplication by a factor of 10000 to keep 4 decimals and cast to int32*/
                     interoY=(int32) (Out_accY2*DECIMALS); 
                     
                     /*divide the int32 in 4 bytes */
@@ -316,7 +316,7 @@ int main(void)
                     /*cast to a floating point in m/s^2 units (sensitivity=2mg/digit)*/
                     Out_accZ2= (float32)Out_accZ*G*SENSITIVITY;
                     
-                    /*multiplication by a factor of 10000 to keep 4 decimals and cast to a int32*/
+                    /*multiplication by a factor of 10000 to keep 4 decimals and cast to int32*/
                     interoZ=(int32) (Out_accZ2*DECIMALS);
                     
                     /*divide the int32 in 4 bytes */
