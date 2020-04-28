@@ -1,4 +1,4 @@
-ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 1
+ARM GAS  C:\Users\Susanna\AppData\Local\Temp\ccldr8Fd.s 			page 1
 
 
    1              		.syntax unified
@@ -41,74 +41,72 @@ ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 1
    5:main.c        **** * to understand the I2C protocol and communicate with a
    6:main.c        **** * a I2C Slave device (LIS3DH Accelerometer).
    7:main.c        **** *
-   8:main.c        **** * \author Gabriele Belotti
-   9:main.c        **** * \date , 2020
-  10:main.c        **** */
-  11:main.c        **** 
-  12:main.c        **** // Include required header files
-  13:main.c        **** #include "I2C_Interface.h"
-  14:main.c        **** #include "project.h"
-  15:main.c        **** #include "stdio.h"
-  16:main.c        **** #include "InterruptRoutines.h"
-  17:main.c        **** 
-  18:main.c        **** /**
-  19:main.c        **** *   \brief 7-bit I2C address of the slave device.
-  20:main.c        **** */
-  21:main.c        **** #define LIS3DH_DEVICE_ADDRESS 0x18
-  22:main.c        **** 
-  23:main.c        **** /**
-  24:main.c        **** *   \brief Address of the WHO AM I register
-ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 2
+   8:main.c        **** */
+   9:main.c        **** 
+  10:main.c        **** // Include required header files
+  11:main.c        **** #include "I2C_Interface.h"
+  12:main.c        **** #include "project.h"
+  13:main.c        **** #include "stdio.h"
+  14:main.c        **** #include "InterruptRoutines.h"
+  15:main.c        **** 
+  16:main.c        **** /**
+  17:main.c        **** *   \brief 7-bit I2C address of the slave device.
+  18:main.c        **** */
+  19:main.c        **** #define LIS3DH_DEVICE_ADDRESS 0x18
+  20:main.c        **** 
+  21:main.c        **** /**
+  22:main.c        **** *   \brief Address of the WHO AM I register
+  23:main.c        **** */
+  24:main.c        **** #define LIS3DH_WHO_AM_I_REG_ADDR 0x0F
+ARM GAS  C:\Users\Susanna\AppData\Local\Temp\ccldr8Fd.s 			page 2
 
 
-  25:main.c        **** */
-  26:main.c        **** #define LIS3DH_WHO_AM_I_REG_ADDR 0x0F
-  27:main.c        **** 
-  28:main.c        **** /**
-  29:main.c        **** *   \brief Address of the Status register
-  30:main.c        **** */
-  31:main.c        **** #define LIS3DH_STATUS_REG 0x27
-  32:main.c        **** 
-  33:main.c        **** /**
-  34:main.c        **** *   \brief Address of the Control register 1
-  35:main.c        **** */
-  36:main.c        **** #define LIS3DH_CTRL_REG1 0x20
-  37:main.c        **** 
-  38:main.c        **** /**
-  39:main.c        **** *   \brief Hex value to set normal mode to the accelerator
-  40:main.c        **** */
-  41:main.c        **** #define LIS3DH_HR_MODE_CTRL_REG1 0x57  //High resolution mode, 100 Hz
+  25:main.c        **** 
+  26:main.c        **** /**
+  27:main.c        **** *   \brief Address of the Status register
+  28:main.c        **** */
+  29:main.c        **** #define LIS3DH_STATUS_REG 0x27
+  30:main.c        **** 
+  31:main.c        **** /**
+  32:main.c        **** *   \brief Address of the Control register 1
+  33:main.c        **** */
+  34:main.c        **** #define LIS3DH_CTRL_REG1 0x20
+  35:main.c        **** 
+  36:main.c        **** /**
+  37:main.c        **** *   \brief Hex value to set normal mode to the accelerator
+  38:main.c        **** */
+  39:main.c        **** #define LIS3DH_HR_MODE_CTRL_REG1 0x57  //High resolution mode, 100 Hz
+  40:main.c        **** 
+  41:main.c        **** 
   42:main.c        **** 
-  43:main.c        **** 
-  44:main.c        **** 
-  45:main.c        **** /**
-  46:main.c        **** *   \brief Address of the Control register 4
-  47:main.c        **** */
-  48:main.c        **** #define LIS3DH_CTRL_REG4 0x23
-  49:main.c        **** 
-  50:main.c        **** /**
-  51:main.c        **** *   \brief Hex value to set the FSR and activate the BDU
-  52:main.c        **** */
-  53:main.c        **** #define LIS3DH_CTRL_REG4_BDU_ACTIVE 0x98 // [-4.0g, +4.0g] FSR, BDU active
-  54:main.c        **** 
-  55:main.c        **** /**
-  56:main.c        **** *   \brief Addresses of the Output registers 
-  57:main.c        **** */
-  58:main.c        **** #define LIS3DH_OUT_X_L 0x28 
-  59:main.c        **** #define LIS3DH_OUT_X_H 0x29 
-  60:main.c        **** #define LIS3DH_OUT_Y_L 0x2A 
-  61:main.c        **** #define LIS3DH_OUT_Y_H 0x2B 
-  62:main.c        **** #define LIS3DH_OUT_Z_L 0x2C 
-  63:main.c        **** #define LIS3DH_OUT_Z_H 0x2D 
-  64:main.c        **** 
-  65:main.c        **** #define SENSITIVITY 0.002   // senitivity = 0.002g/digit
-  66:main.c        **** #define G 9.81              //gravitational acceleration = 9.81 m/s^2
-  67:main.c        **** #define DECIMALS 10000      //multiplication factor to keep 4 decimals
-  68:main.c        **** 
-  69:main.c        **** 
-  70:main.c        **** int main(void)
-  71:main.c        **** {
-  34              		.loc 1 71 0
+  43:main.c        **** /**
+  44:main.c        **** *   \brief Address of the Control register 4
+  45:main.c        **** */
+  46:main.c        **** #define LIS3DH_CTRL_REG4 0x23
+  47:main.c        **** 
+  48:main.c        **** /**
+  49:main.c        **** *   \brief Hex value to set the FSR and activate the BDU
+  50:main.c        **** */
+  51:main.c        **** #define LIS3DH_CTRL_REG4_BDU_ACTIVE 0x98 // [-4.0g, +4.0g] FSR, BDU active
+  52:main.c        **** 
+  53:main.c        **** /**
+  54:main.c        **** *   \brief Addresses of the Output registers 
+  55:main.c        **** */
+  56:main.c        **** #define LIS3DH_OUT_X_L 0x28 
+  57:main.c        **** #define LIS3DH_OUT_X_H 0x29 
+  58:main.c        **** #define LIS3DH_OUT_Y_L 0x2A 
+  59:main.c        **** #define LIS3DH_OUT_Y_H 0x2B 
+  60:main.c        **** #define LIS3DH_OUT_Z_L 0x2C 
+  61:main.c        **** #define LIS3DH_OUT_Z_H 0x2D 
+  62:main.c        **** 
+  63:main.c        **** #define SENSITIVITY 0.002   // senitivity = 0.002g/digit
+  64:main.c        **** #define G 9.81              //gravitational acceleration = 9.81 m/s^2
+  65:main.c        **** #define DECIMALS 10000      //multiplication factor to keep 4 decimals
+  66:main.c        **** 
+  67:main.c        **** 
+  68:main.c        **** int main(void)
+  69:main.c        **** {
+  34              		.loc 1 69 0
   35              		.cfi_startproc
   36              		@ args = 0, pretend = 0, frame = 80
   37              		@ frame_needed = 0, uses_anonymous_args = 0
@@ -118,533 +116,533 @@ ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 1
   41              		.cfi_offset 14, -4
   42 0002 94B0     		sub	sp, sp, #80
   43              		.cfi_def_cfa_offset 88
-ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 3
+  70:main.c        ****     CyGlobalIntEnable; /* Enable global interrupts. */
+  44              		.loc 1 70 0
+ARM GAS  C:\Users\Susanna\AppData\Local\Temp\ccldr8Fd.s 			page 3
 
 
-  72:main.c        ****     CyGlobalIntEnable; /* Enable global interrupts. */
-  44              		.loc 1 72 0
   45              		.syntax unified
-  46              	@ 72 "main.c" 1
+  46              	@ 70 "main.c" 1
   47 0004 62B6     		CPSIE   i
   48              	@ 0 "" 2
-  73:main.c        **** 
-  74:main.c        ****     /* Place your initialization/startup code here (e.g. MyInst_Start()) */
-  75:main.c        ****     Timer_Start();
-  49              		.loc 1 75 0
+  71:main.c        **** 
+  72:main.c        ****     /* Place your initialization/startup code here (e.g. MyInst_Start()) */
+  73:main.c        ****     Timer_Start();
+  49              		.loc 1 73 0
   50              		.thumb
   51              		.syntax unified
   52 0006 FFF7FEFF 		bl	Timer_Start
   53              	.LVL0:
-  76:main.c        ****     isr_ADC_StartEx(Custom_ISR_ADC);
-  54              		.loc 1 76 0
+  74:main.c        ****     isr_ADC_StartEx(Custom_ISR_ADC);
+  54              		.loc 1 74 0
   55 000a B548     		ldr	r0, .L22+16
   56 000c FFF7FEFF 		bl	isr_ADC_StartEx
   57              	.LVL1:
-  77:main.c        ****     I2C_Peripheral_Start();
-  58              		.loc 1 77 0
+  75:main.c        ****     I2C_Peripheral_Start();
+  58              		.loc 1 75 0
   59 0010 FFF7FEFF 		bl	I2C_Peripheral_Start
   60              	.LVL2:
-  78:main.c        ****     UART_Debug_Start();
-  61              		.loc 1 78 0
+  76:main.c        ****     UART_Debug_Start();
+  61              		.loc 1 76 0
   62 0014 FFF7FEFF 		bl	UART_Debug_Start
   63              	.LVL3:
-  79:main.c        ****     
-  80:main.c        ****     flag_ISR=0; //initialization of flag_ISR
-  64              		.loc 1 80 0
+  77:main.c        ****     
+  78:main.c        ****     flag_ISR=0; //initialization of flag_ISR
+  64              		.loc 1 78 0
   65 0018 0024     		movs	r4, #0
   66 001a B24B     		ldr	r3, .L22+20
   67 001c 1C70     		strb	r4, [r3]
-  81:main.c        ****     
-  82:main.c        ****     CyDelay(5); //"The boot procedure is complete about 5 milliseconds after device power-up."
-  68              		.loc 1 82 0
+  79:main.c        ****     
+  80:main.c        ****     CyDelay(5); //"The boot procedure is complete about 5 milliseconds after device power-up."
+  68              		.loc 1 80 0
   69 001e 0520     		movs	r0, #5
   70 0020 FFF7FEFF 		bl	CyDelay
   71              	.LVL4:
   72              	.LBB2:
-  83:main.c        ****     
-  84:main.c        ****     // String to print out messages on the UART
-  85:main.c        ****     char message[50];
-  86:main.c        **** 
-  87:main.c        ****     // Check which devices are present on the I2C bus
-  88:main.c        ****     for (int i = 0 ; i < 128; i++)
-  73              		.loc 1 88 0
+  81:main.c        ****     
+  82:main.c        ****     // String to print out messages on the UART
+  83:main.c        ****     char message[50];
+  84:main.c        **** 
+  85:main.c        ****     // Check which devices are present on the I2C bus
+  86:main.c        ****     for (int i = 0 ; i < 128; i++)
+  73              		.loc 1 86 0
   74 0024 0CE0     		b	.L2
   75              	.LVL5:
   76              	.L4:
-  89:main.c        ****     {
-  90:main.c        ****         if (I2C_Peripheral_IsDeviceConnected(i))
-  77              		.loc 1 90 0
+  87:main.c        ****     {
+  88:main.c        ****         if (I2C_Peripheral_IsDeviceConnected(i))
+  77              		.loc 1 88 0
   78 0026 E0B2     		uxtb	r0, r4
   79 0028 FFF7FEFF 		bl	I2C_Peripheral_IsDeviceConnected
   80              	.LVL6:
   81 002c 38B1     		cbz	r0, .L3
-ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 4
+  89:main.c        ****         {
+  90:main.c        ****             // print out the address is hex format
+ARM GAS  C:\Users\Susanna\AppData\Local\Temp\ccldr8Fd.s 			page 4
 
 
-  91:main.c        ****         {
-  92:main.c        ****             // print out the address is hex format
-  93:main.c        ****             sprintf(message, "Device 0x%02X is connected\r\n", i);
-  82              		.loc 1 93 0
+  91:main.c        ****             sprintf(message, "Device 0x%02X is connected\r\n", i);
+  82              		.loc 1 91 0
   83 002e 2246     		mov	r2, r4
   84 0030 AD49     		ldr	r1, .L22+24
   85 0032 07A8     		add	r0, sp, #28
   86 0034 FFF7FEFF 		bl	sprintf
   87              	.LVL7:
-  94:main.c        ****             UART_Debug_PutString(message); 
-  88              		.loc 1 94 0
+  92:main.c        ****             UART_Debug_PutString(message); 
+  88              		.loc 1 92 0
   89 0038 07A8     		add	r0, sp, #28
   90 003a FFF7FEFF 		bl	UART_Debug_PutString
   91              	.LVL8:
   92              	.L3:
-  88:main.c        ****     {
-  93              		.loc 1 88 0 discriminator 2
+  86:main.c        ****     {
+  93              		.loc 1 86 0 discriminator 2
   94 003e 0134     		adds	r4, r4, #1
   95              	.LVL9:
   96              	.L2:
-  88:main.c        ****     {
-  97              		.loc 1 88 0 is_stmt 0 discriminator 1
+  86:main.c        ****     {
+  97              		.loc 1 86 0 is_stmt 0 discriminator 1
   98 0040 7F2C     		cmp	r4, #127
   99 0042 F0DD     		ble	.L4
  100              	.LBE2:
-  95:main.c        ****         }
-  96:main.c        ****         
-  97:main.c        ****     }
-  98:main.c        ****     
+  93:main.c        ****         }
+  94:main.c        ****         
+  95:main.c        ****     }
+  96:main.c        ****     
+  97:main.c        ****     /******************************************/
+  98:main.c        ****     /*            I2C Reading                 */
   99:main.c        ****     /******************************************/
- 100:main.c        ****     /*            I2C Reading                 */
- 101:main.c        ****     /******************************************/
- 102:main.c        ****     
- 103:main.c        ****     /* Read WHO AM I REGISTER register */
- 104:main.c        ****     uint8_t who_am_i_reg;
- 105:main.c        ****     ErrorCode error = I2C_Peripheral_ReadRegister(LIS3DH_DEVICE_ADDRESS,
- 101              		.loc 1 105 0 is_stmt 1
+ 100:main.c        ****     
+ 101:main.c        ****     /* Read WHO AM I REGISTER register */
+ 102:main.c        ****     uint8_t who_am_i_reg;
+ 103:main.c        ****     ErrorCode error = I2C_Peripheral_ReadRegister(LIS3DH_DEVICE_ADDRESS,
+ 101              		.loc 1 103 0 is_stmt 1
  102 0044 0DF11B02 		add	r2, sp, #27
  103 0048 0F21     		movs	r1, #15
  104 004a 1820     		movs	r0, #24
  105 004c FFF7FEFF 		bl	I2C_Peripheral_ReadRegister
  106              	.LVL10:
- 106:main.c        ****                                                   LIS3DH_WHO_AM_I_REG_ADDR, 
- 107:main.c        ****                                                   &who_am_i_reg);
- 108:main.c        ****     if (error == NO_ERROR)
- 107              		.loc 1 108 0
+ 104:main.c        ****                                                   LIS3DH_WHO_AM_I_REG_ADDR, 
+ 105:main.c        ****                                                   &who_am_i_reg);
+ 106:main.c        ****     if (error == NO_ERROR)
+ 107              		.loc 1 106 0
  108 0050 48B9     		cbnz	r0, .L5
- 109:main.c        ****     {
- 110:main.c        ****         sprintf(message, "WHO AM I REG: 0x%02X [Expected: 0x33]\r\n", who_am_i_reg);
- 109              		.loc 1 110 0
+ 107:main.c        ****     {
+ 108:main.c        ****         sprintf(message, "WHO AM I REG: 0x%02X [Expected: 0x33]\r\n", who_am_i_reg);
+ 109              		.loc 1 108 0
  110 0052 9DF81B20 		ldrb	r2, [sp, #27]	@ zero_extendqisi2
  111 0056 A549     		ldr	r1, .L22+28
  112 0058 07A8     		add	r0, sp, #28
  113              	.LVL11:
  114 005a FFF7FEFF 		bl	sprintf
  115              	.LVL12:
- 111:main.c        ****         UART_Debug_PutString(message); 
-ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 5
-
-
- 116              		.loc 1 111 0
+ 109:main.c        ****         UART_Debug_PutString(message); 
+ 116              		.loc 1 109 0
  117 005e 07A8     		add	r0, sp, #28
+ARM GAS  C:\Users\Susanna\AppData\Local\Temp\ccldr8Fd.s 			page 5
+
+
  118 0060 FFF7FEFF 		bl	UART_Debug_PutString
  119              	.LVL13:
  120 0064 02E0     		b	.L6
  121              	.LVL14:
  122              	.L5:
- 112:main.c        ****     }
- 113:main.c        ****     else
- 114:main.c        ****     {
- 115:main.c        ****         UART_Debug_PutString("Error occurred during I2C comm\r\n");   
- 123              		.loc 1 115 0
+ 110:main.c        ****     }
+ 111:main.c        ****     else
+ 112:main.c        ****     {
+ 113:main.c        ****         UART_Debug_PutString("Error occurred during I2C comm\r\n");   
+ 123              		.loc 1 113 0
  124 0066 A248     		ldr	r0, .L22+32
  125              	.LVL15:
  126 0068 FFF7FEFF 		bl	UART_Debug_PutString
  127              	.LVL16:
  128              	.L6:
- 116:main.c        ****     }
- 117:main.c        ****     
- 118:main.c        ****     /*      I2C Reading Status Register       */
- 119:main.c        ****      
- 120:main.c        ****     uint8_t status_register;
- 121:main.c        ****     error = I2C_Peripheral_ReadRegister(LIS3DH_DEVICE_ADDRESS,
- 129              		.loc 1 121 0
+ 114:main.c        ****     }
+ 115:main.c        ****     
+ 116:main.c        ****     /*      I2C Reading Status Register       */
+ 117:main.c        ****      
+ 118:main.c        ****     uint8_t status_register;
+ 119:main.c        ****     error = I2C_Peripheral_ReadRegister(LIS3DH_DEVICE_ADDRESS,
+ 129              		.loc 1 119 0
  130 006c 0DF11A02 		add	r2, sp, #26
  131 0070 2721     		movs	r1, #39
  132 0072 1820     		movs	r0, #24
  133 0074 FFF7FEFF 		bl	I2C_Peripheral_ReadRegister
  134              	.LVL17:
- 122:main.c        ****                                         LIS3DH_STATUS_REG,
- 123:main.c        ****                                         &status_register);
- 124:main.c        ****     
- 125:main.c        ****     if (error == NO_ERROR)
- 135              		.loc 1 125 0
+ 120:main.c        ****                                         LIS3DH_STATUS_REG,
+ 121:main.c        ****                                         &status_register);
+ 122:main.c        ****     
+ 123:main.c        ****     if (error == NO_ERROR)
+ 135              		.loc 1 123 0
  136 0078 48B9     		cbnz	r0, .L7
- 126:main.c        ****     {
- 127:main.c        ****         sprintf(message, "STATUS REGISTER: 0x%02X\r\n", status_register);
- 137              		.loc 1 127 0
+ 124:main.c        ****     {
+ 125:main.c        ****         sprintf(message, "STATUS REGISTER: 0x%02X\r\n", status_register);
+ 137              		.loc 1 125 0
  138 007a 9DF81A20 		ldrb	r2, [sp, #26]	@ zero_extendqisi2
  139 007e 9D49     		ldr	r1, .L22+36
  140 0080 07A8     		add	r0, sp, #28
  141              	.LVL18:
  142 0082 FFF7FEFF 		bl	sprintf
  143              	.LVL19:
- 128:main.c        ****         UART_Debug_PutString(message); 
- 144              		.loc 1 128 0
+ 126:main.c        ****         UART_Debug_PutString(message); 
+ 144              		.loc 1 126 0
  145 0086 07A8     		add	r0, sp, #28
  146 0088 FFF7FEFF 		bl	UART_Debug_PutString
  147              	.LVL20:
  148 008c 02E0     		b	.L8
  149              	.LVL21:
  150              	.L7:
- 129:main.c        ****     }
- 130:main.c        ****     else
- 131:main.c        ****     {
- 132:main.c        ****         UART_Debug_PutString("Error occurred during I2C comm to read status register\r\n");   
- 151              		.loc 1 132 0
-ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 6
-
-
+ 127:main.c        ****     }
+ 128:main.c        ****     else
+ 129:main.c        ****     {
+ 130:main.c        ****         UART_Debug_PutString("Error occurred during I2C comm to read status register\r\n");   
+ 151              		.loc 1 130 0
  152 008e 9A48     		ldr	r0, .L22+40
  153              	.LVL22:
+ARM GAS  C:\Users\Susanna\AppData\Local\Temp\ccldr8Fd.s 			page 6
+
+
  154 0090 FFF7FEFF 		bl	UART_Debug_PutString
  155              	.LVL23:
  156              	.L8:
- 133:main.c        ****     }
- 134:main.c        ****     
+ 131:main.c        ****     }
+ 132:main.c        ****     
+ 133:main.c        ****     /******************************************/
+ 134:main.c        ****     /*        Read Control Register 1         */
  135:main.c        ****     /******************************************/
- 136:main.c        ****     /*        Read Control Register 1         */
- 137:main.c        ****     /******************************************/
- 138:main.c        ****     uint8_t ctrl_reg1; 
- 139:main.c        ****     error = I2C_Peripheral_ReadRegister(LIS3DH_DEVICE_ADDRESS,
- 157              		.loc 1 139 0
+ 136:main.c        ****     uint8_t ctrl_reg1; 
+ 137:main.c        ****     error = I2C_Peripheral_ReadRegister(LIS3DH_DEVICE_ADDRESS,
+ 157              		.loc 1 137 0
  158 0094 0DF11902 		add	r2, sp, #25
  159 0098 2021     		movs	r1, #32
  160 009a 1820     		movs	r0, #24
  161 009c FFF7FEFF 		bl	I2C_Peripheral_ReadRegister
  162              	.LVL24:
- 140:main.c        ****                                         LIS3DH_CTRL_REG1,
- 141:main.c        ****                                         &ctrl_reg1);
- 142:main.c        ****     
- 143:main.c        ****     if (error == NO_ERROR)
- 163              		.loc 1 143 0
+ 138:main.c        ****                                         LIS3DH_CTRL_REG1,
+ 139:main.c        ****                                         &ctrl_reg1);
+ 140:main.c        ****     
+ 141:main.c        ****     if (error == NO_ERROR)
+ 163              		.loc 1 141 0
  164 00a0 48B9     		cbnz	r0, .L9
- 144:main.c        ****     {
- 145:main.c        ****         sprintf(message, "CONTROL REGISTER 1: 0x%02X\r\n", ctrl_reg1);
- 165              		.loc 1 145 0
+ 142:main.c        ****     {
+ 143:main.c        ****         sprintf(message, "CONTROL REGISTER 1: 0x%02X\r\n", ctrl_reg1);
+ 165              		.loc 1 143 0
  166 00a2 9DF81920 		ldrb	r2, [sp, #25]	@ zero_extendqisi2
  167 00a6 9549     		ldr	r1, .L22+44
  168 00a8 07A8     		add	r0, sp, #28
  169              	.LVL25:
  170 00aa FFF7FEFF 		bl	sprintf
  171              	.LVL26:
- 146:main.c        ****         UART_Debug_PutString(message); 
- 172              		.loc 1 146 0
+ 144:main.c        ****         UART_Debug_PutString(message); 
+ 172              		.loc 1 144 0
  173 00ae 07A8     		add	r0, sp, #28
  174 00b0 FFF7FEFF 		bl	UART_Debug_PutString
  175              	.LVL27:
  176 00b4 02E0     		b	.L10
  177              	.LVL28:
  178              	.L9:
- 147:main.c        ****     }
- 148:main.c        ****     else
- 149:main.c        ****     {
- 150:main.c        ****         UART_Debug_PutString("Error occurred during I2C comm to read control register 1\r\n");   
- 179              		.loc 1 150 0
+ 145:main.c        ****     }
+ 146:main.c        ****     else
+ 147:main.c        ****     {
+ 148:main.c        ****         UART_Debug_PutString("Error occurred during I2C comm to read control register 1\r\n");   
+ 179              		.loc 1 148 0
  180 00b6 9248     		ldr	r0, .L22+48
  181              	.LVL29:
  182 00b8 FFF7FEFF 		bl	UART_Debug_PutString
  183              	.LVL30:
  184              	.L10:
- 151:main.c        ****     }
- 152:main.c        ****     
+ 149:main.c        ****     }
+ 150:main.c        ****     
+ 151:main.c        ****     /******************************************/
+ 152:main.c        ****     /*            I2C Writing                 */
  153:main.c        ****     /******************************************/
- 154:main.c        ****     /*            I2C Writing                 */
- 155:main.c        ****     /******************************************/
- 156:main.c        ****     
-ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 7
+ 154:main.c        ****     
+ 155:main.c        ****         
+ 156:main.c        ****     UART_Debug_PutString("\r\nWriting new values..\r\n");
+ARM GAS  C:\Users\Susanna\AppData\Local\Temp\ccldr8Fd.s 			page 7
 
 
- 157:main.c        ****         
- 158:main.c        ****     UART_Debug_PutString("\r\nWriting new values..\r\n");
- 185              		.loc 1 158 0
+ 185              		.loc 1 156 0
  186 00bc 9148     		ldr	r0, .L22+52
  187 00be FFF7FEFF 		bl	UART_Debug_PutString
  188              	.LVL31:
- 159:main.c        ****     
- 160:main.c        ****     if (ctrl_reg1 != LIS3DH_HR_MODE_CTRL_REG1)
- 189              		.loc 1 160 0
+ 157:main.c        ****     
+ 158:main.c        ****     if (ctrl_reg1 != LIS3DH_HR_MODE_CTRL_REG1)
+ 189              		.loc 1 158 0
  190 00c2 9DF81930 		ldrb	r3, [sp, #25]	@ zero_extendqisi2
  191 00c6 572B     		cmp	r3, #87
  192 00c8 14D0     		beq	.L11
- 161:main.c        ****     {
- 162:main.c        ****         ctrl_reg1 = LIS3DH_HR_MODE_CTRL_REG1;
- 193              		.loc 1 162 0
+ 159:main.c        ****     {
+ 160:main.c        ****         ctrl_reg1 = LIS3DH_HR_MODE_CTRL_REG1;
+ 193              		.loc 1 160 0
  194 00ca 5722     		movs	r2, #87
  195 00cc 8DF81920 		strb	r2, [sp, #25]
- 163:main.c        ****     
- 164:main.c        ****         error = I2C_Peripheral_WriteRegister(LIS3DH_DEVICE_ADDRESS,
- 196              		.loc 1 164 0
+ 161:main.c        ****     
+ 162:main.c        ****         error = I2C_Peripheral_WriteRegister(LIS3DH_DEVICE_ADDRESS,
+ 196              		.loc 1 162 0
  197 00d0 2021     		movs	r1, #32
  198 00d2 1820     		movs	r0, #24
  199 00d4 FFF7FEFF 		bl	I2C_Peripheral_WriteRegister
  200              	.LVL32:
- 165:main.c        ****                                              LIS3DH_CTRL_REG1,
- 166:main.c        ****                                              ctrl_reg1);
- 167:main.c        ****     
- 168:main.c        ****         if (error == NO_ERROR)
- 201              		.loc 1 168 0
+ 163:main.c        ****                                              LIS3DH_CTRL_REG1,
+ 164:main.c        ****                                              ctrl_reg1);
+ 165:main.c        ****     
+ 166:main.c        ****         if (error == NO_ERROR)
+ 201              		.loc 1 166 0
  202 00d8 48B9     		cbnz	r0, .L12
- 169:main.c        ****         {
- 170:main.c        ****             sprintf(message, "CONTROL REGISTER 1 successfully written as: 0x%02X\r\n", ctrl_reg1);
- 203              		.loc 1 170 0
+ 167:main.c        ****         {
+ 168:main.c        ****             sprintf(message, "CONTROL REGISTER 1 successfully written as: 0x%02X\r\n", ctrl_reg1);
+ 203              		.loc 1 168 0
  204 00da 9DF81920 		ldrb	r2, [sp, #25]	@ zero_extendqisi2
  205 00de 8A49     		ldr	r1, .L22+56
  206 00e0 07A8     		add	r0, sp, #28
  207              	.LVL33:
  208 00e2 FFF7FEFF 		bl	sprintf
  209              	.LVL34:
- 171:main.c        ****             UART_Debug_PutString(message); 
- 210              		.loc 1 171 0
+ 169:main.c        ****             UART_Debug_PutString(message); 
+ 210              		.loc 1 169 0
  211 00e6 07A8     		add	r0, sp, #28
  212 00e8 FFF7FEFF 		bl	UART_Debug_PutString
  213              	.LVL35:
  214 00ec 02E0     		b	.L11
  215              	.LVL36:
  216              	.L12:
- 172:main.c        ****         }
- 173:main.c        ****         else
- 174:main.c        ****         {
- 175:main.c        ****             UART_Debug_PutString("Error occurred during I2C comm to set control register 1\r\n");  
- 217              		.loc 1 175 0
+ 170:main.c        ****         }
+ 171:main.c        ****         else
+ 172:main.c        ****         {
+ 173:main.c        ****             UART_Debug_PutString("Error occurred during I2C comm to set control register 1\r\n");  
+ 217              		.loc 1 173 0
  218 00ee 8748     		ldr	r0, .L22+60
  219              	.LVL37:
  220 00f0 FFF7FEFF 		bl	UART_Debug_PutString
  221              	.LVL38:
  222              	.L11:
-ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 8
+ 174:main.c        ****         }
+ 175:main.c        ****     }
+ARM GAS  C:\Users\Susanna\AppData\Local\Temp\ccldr8Fd.s 			page 8
 
 
- 176:main.c        ****         }
- 177:main.c        ****     }
- 178:main.c        ****     
+ 176:main.c        ****     
+ 177:main.c        ****     /******************************************/
+ 178:main.c        ****     /*     Read Control Register 1 again      */
  179:main.c        ****     /******************************************/
- 180:main.c        ****     /*     Read Control Register 1 again      */
- 181:main.c        ****     /******************************************/
- 182:main.c        **** 
- 183:main.c        ****     error = I2C_Peripheral_ReadRegister(LIS3DH_DEVICE_ADDRESS,
- 223              		.loc 1 183 0
+ 180:main.c        **** 
+ 181:main.c        ****     error = I2C_Peripheral_ReadRegister(LIS3DH_DEVICE_ADDRESS,
+ 223              		.loc 1 181 0
  224 00f4 0DF11902 		add	r2, sp, #25
  225 00f8 2021     		movs	r1, #32
  226 00fa 1820     		movs	r0, #24
  227 00fc FFF7FEFF 		bl	I2C_Peripheral_ReadRegister
  228              	.LVL39:
- 184:main.c        ****                                         LIS3DH_CTRL_REG1,
- 185:main.c        ****                                         &ctrl_reg1);
- 186:main.c        ****     
- 187:main.c        ****     if (error == NO_ERROR)
- 229              		.loc 1 187 0
+ 182:main.c        ****                                         LIS3DH_CTRL_REG1,
+ 183:main.c        ****                                         &ctrl_reg1);
+ 184:main.c        ****     
+ 185:main.c        ****     if (error == NO_ERROR)
+ 229              		.loc 1 185 0
  230 0100 48B9     		cbnz	r0, .L13
- 188:main.c        ****     {
- 189:main.c        ****         sprintf(message, "CONTROL REGISTER 1 after overwrite operation: 0x%02X\r\n", ctrl_reg1);
- 231              		.loc 1 189 0
+ 186:main.c        ****     {
+ 187:main.c        ****         sprintf(message, "CONTROL REGISTER 1 after overwrite operation: 0x%02X\r\n", ctrl_reg1);
+ 231              		.loc 1 187 0
  232 0102 9DF81920 		ldrb	r2, [sp, #25]	@ zero_extendqisi2
  233 0106 8249     		ldr	r1, .L22+64
  234 0108 07A8     		add	r0, sp, #28
  235              	.LVL40:
  236 010a FFF7FEFF 		bl	sprintf
  237              	.LVL41:
- 190:main.c        ****         UART_Debug_PutString(message); 
- 238              		.loc 1 190 0
+ 188:main.c        ****         UART_Debug_PutString(message); 
+ 238              		.loc 1 188 0
  239 010e 07A8     		add	r0, sp, #28
  240 0110 FFF7FEFF 		bl	UART_Debug_PutString
  241              	.LVL42:
  242 0114 02E0     		b	.L14
  243              	.LVL43:
  244              	.L13:
- 191:main.c        ****     }
- 192:main.c        ****     else
- 193:main.c        ****     {
- 194:main.c        ****         UART_Debug_PutString("Error occurred during I2C comm to read control register 1\r\n");   
- 245              		.loc 1 194 0
+ 189:main.c        ****     }
+ 190:main.c        ****     else
+ 191:main.c        ****     {
+ 192:main.c        ****         UART_Debug_PutString("Error occurred during I2C comm to read control register 1\r\n");   
+ 245              		.loc 1 192 0
  246 0116 7A48     		ldr	r0, .L22+48
  247              	.LVL44:
  248 0118 FFF7FEFF 		bl	UART_Debug_PutString
  249              	.LVL45:
  250              	.L14:
- 195:main.c        ****     }
- 196:main.c        ****     
+ 193:main.c        ****     }
+ 194:main.c        ****     
+ 195:main.c        ****      /******************************************/
+ 196:main.c        ****      /* I2C Reading Temperature sensor CFG reg */
  197:main.c        ****      /******************************************/
- 198:main.c        ****      /* I2C Reading Temperature sensor CFG reg */
- 199:main.c        ****      /******************************************/
- 200:main.c        **** 
- 201:main.c        ****     
- 202:main.c        ****     
- 203:main.c        ****     uint8_t ctrl_reg4;
- 204:main.c        **** 
-ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 9
+ 198:main.c        **** 
+ 199:main.c        ****     
+ 200:main.c        ****     
+ 201:main.c        ****     uint8_t ctrl_reg4;
+ 202:main.c        **** 
+ 203:main.c        ****     error = I2C_Peripheral_ReadRegister(LIS3DH_DEVICE_ADDRESS,
+ 251              		.loc 1 203 0
+ARM GAS  C:\Users\Susanna\AppData\Local\Temp\ccldr8Fd.s 			page 9
 
 
- 205:main.c        ****     error = I2C_Peripheral_ReadRegister(LIS3DH_DEVICE_ADDRESS,
- 251              		.loc 1 205 0
  252 011c 06AA     		add	r2, sp, #24
  253 011e 2321     		movs	r1, #35
  254 0120 1820     		movs	r0, #24
  255 0122 FFF7FEFF 		bl	I2C_Peripheral_ReadRegister
  256              	.LVL46:
- 206:main.c        ****                                         LIS3DH_CTRL_REG4,
- 207:main.c        ****                                         &ctrl_reg4);
- 208:main.c        ****     
- 209:main.c        ****     if (error == NO_ERROR)
- 257              		.loc 1 209 0
+ 204:main.c        ****                                         LIS3DH_CTRL_REG4,
+ 205:main.c        ****                                         &ctrl_reg4);
+ 206:main.c        ****     
+ 207:main.c        ****     if (error == NO_ERROR)
+ 257              		.loc 1 207 0
  258 0126 48B9     		cbnz	r0, .L15
- 210:main.c        ****     {
- 211:main.c        ****         sprintf(message, "CONTROL REGISTER 4: 0x%02X\r\n", ctrl_reg4);
- 259              		.loc 1 211 0
+ 208:main.c        ****     {
+ 209:main.c        ****         sprintf(message, "CONTROL REGISTER 4: 0x%02X\r\n", ctrl_reg4);
+ 259              		.loc 1 209 0
  260 0128 9DF81820 		ldrb	r2, [sp, #24]	@ zero_extendqisi2
  261 012c 7949     		ldr	r1, .L22+68
  262 012e 07A8     		add	r0, sp, #28
  263              	.LVL47:
  264 0130 FFF7FEFF 		bl	sprintf
  265              	.LVL48:
- 212:main.c        ****         UART_Debug_PutString(message); 
- 266              		.loc 1 212 0
+ 210:main.c        ****         UART_Debug_PutString(message); 
+ 266              		.loc 1 210 0
  267 0134 07A8     		add	r0, sp, #28
  268 0136 FFF7FEFF 		bl	UART_Debug_PutString
  269              	.LVL49:
  270 013a 02E0     		b	.L16
  271              	.LVL50:
  272              	.L15:
- 213:main.c        ****     }
- 214:main.c        ****     else
- 215:main.c        ****     {
- 216:main.c        ****         UART_Debug_PutString("Error occurred during I2C comm to read control register4\r\n");   
- 273              		.loc 1 216 0
+ 211:main.c        ****     }
+ 212:main.c        ****     else
+ 213:main.c        ****     {
+ 214:main.c        ****         UART_Debug_PutString("Error occurred during I2C comm to read control register4\r\n");   
+ 273              		.loc 1 214 0
  274 013c 7648     		ldr	r0, .L22+72
  275              	.LVL51:
  276 013e FFF7FEFF 		bl	UART_Debug_PutString
  277              	.LVL52:
  278              	.L16:
- 217:main.c        ****     }
- 218:main.c        ****     
- 219:main.c        ****     
- 220:main.c        ****     ctrl_reg4 = LIS3DH_CTRL_REG4_BDU_ACTIVE; // must be changed to the appropriate value
- 279              		.loc 1 220 0
+ 215:main.c        ****     }
+ 216:main.c        ****     
+ 217:main.c        ****     
+ 218:main.c        ****     ctrl_reg4 = LIS3DH_CTRL_REG4_BDU_ACTIVE; // must be changed to the appropriate value
+ 279              		.loc 1 218 0
  280 0142 9822     		movs	r2, #152
  281 0144 14AC     		add	r4, sp, #80
  282              	.LVL53:
  283 0146 04F8382D 		strb	r2, [r4, #-56]!
- 221:main.c        ****     
- 222:main.c        ****     error = I2C_Peripheral_WriteRegister(LIS3DH_DEVICE_ADDRESS,
- 284              		.loc 1 222 0
+ 219:main.c        ****     
+ 220:main.c        ****     error = I2C_Peripheral_WriteRegister(LIS3DH_DEVICE_ADDRESS,
+ 284              		.loc 1 220 0
  285 014a 2321     		movs	r1, #35
  286 014c 1820     		movs	r0, #24
  287 014e FFF7FEFF 		bl	I2C_Peripheral_WriteRegister
  288              	.LVL54:
- 223:main.c        ****                                          LIS3DH_CTRL_REG4,
-ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 10
+ 221:main.c        ****                                          LIS3DH_CTRL_REG4,
+ 222:main.c        ****                                          ctrl_reg4);
+ 223:main.c        ****     
+ARM GAS  C:\Users\Susanna\AppData\Local\Temp\ccldr8Fd.s 			page 10
 
 
- 224:main.c        ****                                          ctrl_reg4);
- 225:main.c        ****     
- 226:main.c        ****     error = I2C_Peripheral_ReadRegister(LIS3DH_DEVICE_ADDRESS,
- 289              		.loc 1 226 0
+ 224:main.c        ****     error = I2C_Peripheral_ReadRegister(LIS3DH_DEVICE_ADDRESS,
+ 289              		.loc 1 224 0
  290 0152 2246     		mov	r2, r4
  291 0154 2321     		movs	r1, #35
  292 0156 1820     		movs	r0, #24
  293 0158 FFF7FEFF 		bl	I2C_Peripheral_ReadRegister
  294              	.LVL55:
- 227:main.c        ****                                         LIS3DH_CTRL_REG4,
- 228:main.c        ****                                         &ctrl_reg4);
- 229:main.c        ****     
- 230:main.c        ****     
- 231:main.c        ****     if (error == NO_ERROR)
- 295              		.loc 1 231 0
+ 225:main.c        ****                                         LIS3DH_CTRL_REG4,
+ 226:main.c        ****                                         &ctrl_reg4);
+ 227:main.c        ****     
+ 228:main.c        ****     
+ 229:main.c        ****     if (error == NO_ERROR)
+ 295              		.loc 1 229 0
  296 015c 48B9     		cbnz	r0, .L17
- 232:main.c        ****     {
- 233:main.c        ****         sprintf(message, "CONTROL REGISTER 4 after being updated: 0x%02X\r\n", ctrl_reg4);
- 297              		.loc 1 233 0
+ 230:main.c        ****     {
+ 231:main.c        ****         sprintf(message, "CONTROL REGISTER 4 after being updated: 0x%02X\r\n", ctrl_reg4);
+ 297              		.loc 1 231 0
  298 015e 9DF81820 		ldrb	r2, [sp, #24]	@ zero_extendqisi2
  299 0162 6E49     		ldr	r1, .L22+76
  300 0164 07A8     		add	r0, sp, #28
  301              	.LVL56:
  302 0166 FFF7FEFF 		bl	sprintf
  303              	.LVL57:
- 234:main.c        ****         UART_Debug_PutString(message); 
- 304              		.loc 1 234 0
+ 232:main.c        ****         UART_Debug_PutString(message); 
+ 304              		.loc 1 232 0
  305 016a 07A8     		add	r0, sp, #28
  306 016c FFF7FEFF 		bl	UART_Debug_PutString
  307              	.LVL58:
  308 0170 02E0     		b	.L18
  309              	.LVL59:
  310              	.L17:
- 235:main.c        ****     }
- 236:main.c        ****     else
- 237:main.c        ****     {
- 238:main.c        ****         UART_Debug_PutString("Error occurred during I2C comm to read control register4\r\n");   
- 311              		.loc 1 238 0
+ 233:main.c        ****     }
+ 234:main.c        ****     else
+ 235:main.c        ****     {
+ 236:main.c        ****         UART_Debug_PutString("Error occurred during I2C comm to read control register4\r\n");   
+ 311              		.loc 1 236 0
  312 0172 6948     		ldr	r0, .L22+72
  313              	.LVL60:
  314 0174 FFF7FEFF 		bl	UART_Debug_PutString
  315              	.LVL61:
  316              	.L18:
- 239:main.c        ****     }
- 240:main.c        ****     
- 241:main.c        ****     int16_t Out_accX;
- 242:main.c        ****     float32 Out_accX2;
- 243:main.c        ****     int16_t Out_accY;
- 244:main.c        ****     float32 Out_accY2;
- 245:main.c        ****     int16_t Out_accZ;
- 246:main.c        ****     float32 Out_accZ2;
- 247:main.c        ****     uint8_t header = 0xA0;
- 248:main.c        ****     uint8_t footer = 0xC0;
- 249:main.c        ****     uint8_t OutArray[14]; 
- 250:main.c        ****     uint8_t acc[6];
- 251:main.c        ****     
- 252:main.c        ****     int32 interoX;
-ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 11
+ 237:main.c        ****     }
+ 238:main.c        ****     
+ 239:main.c        ****     int16_t Out_accX;
+ 240:main.c        ****     float32 Out_accX2;
+ 241:main.c        ****     int16_t Out_accY;
+ 242:main.c        ****     float32 Out_accY2;
+ 243:main.c        ****     int16_t Out_accZ;
+ 244:main.c        ****     float32 Out_accZ2;
+ 245:main.c        ****     uint8_t header = 0xA0;
+ 246:main.c        ****     uint8_t footer = 0xC0;
+ 247:main.c        ****     uint8_t OutArray[14]; 
+ 248:main.c        ****     uint8_t acc[6];
+ 249:main.c        ****     
+ 250:main.c        ****     int32 interoX;
+ 251:main.c        ****     int32 interoY;
+ 252:main.c        ****     int32 interoZ;
+ARM GAS  C:\Users\Susanna\AppData\Local\Temp\ccldr8Fd.s 			page 11
 
 
- 253:main.c        ****     int32 interoY;
- 254:main.c        ****     int32 interoZ;
- 255:main.c        ****     
- 256:main.c        ****     OutArray[0] = header;
- 317              		.loc 1 256 0
+ 253:main.c        ****     
+ 254:main.c        ****     OutArray[0] = header;
+ 317              		.loc 1 254 0
  318 0178 A023     		movs	r3, #160
  319 017a 8DF80830 		strb	r3, [sp, #8]
- 257:main.c        ****     OutArray[13] = footer;
- 320              		.loc 1 257 0
+ 255:main.c        ****     OutArray[13] = footer;
+ 320              		.loc 1 255 0
  321 017e C023     		movs	r3, #192
  322 0180 8DF81530 		strb	r3, [sp, #21]
  323              	.L20:
- 258:main.c        ****     
- 259:main.c        ****     for(;;)
- 260:main.c        ****     {
- 261:main.c        ****         if(flag_ISR)
- 324              		.loc 1 261 0
+ 256:main.c        ****     
+ 257:main.c        ****     for(;;)
+ 258:main.c        ****     {
+ 259:main.c        ****         if(flag_ISR)
+ 324              		.loc 1 259 0
  325 0184 574B     		ldr	r3, .L22+20
  326 0186 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
  327 0188 13F0FF0F 		tst	r3, #255
  328 018c 00F09A80 		beq	.L19
- 262:main.c        ****         { 
- 263:main.c        ****             error=I2C_Peripheral_ReadRegister(LIS3DH_DEVICE_ADDRESS,
- 329              		.loc 1 263 0
+ 260:main.c        ****         { 
+ 261:main.c        ****             error=I2C_Peripheral_ReadRegister(LIS3DH_DEVICE_ADDRESS,
+ 329              		.loc 1 261 0
  330 0190 0DF11A02 		add	r2, sp, #26
  331 0194 2721     		movs	r1, #39
  332 0196 1820     		movs	r0, #24
  333 0198 FFF7FEFF 		bl	I2C_Peripheral_ReadRegister
  334              	.LVL62:
- 264:main.c        ****                                         LIS3DH_STATUS_REG,
- 265:main.c        ****                                         &status_register);
- 266:main.c        ****             
- 267:main.c        ****             if ((error == NO_ERROR) && ((status_register) & (DATA_AVAILABLE)))
- 335              		.loc 1 267 0
+ 262:main.c        ****                                         LIS3DH_STATUS_REG,
+ 263:main.c        ****                                         &status_register);
+ 264:main.c        ****             
+ 265:main.c        ****             if ((error == NO_ERROR) && ((status_register) & (DATA_AVAILABLE)))
+ 335              		.loc 1 265 0
  336 019c 0028     		cmp	r0, #0
  337 019e 40F09180 		bne	.L19
- 338              		.loc 1 267 0 is_stmt 0 discriminator 1
+ 338              		.loc 1 265 0 is_stmt 0 discriminator 1
  339 01a2 9DF81A30 		ldrb	r3, [sp, #26]	@ zero_extendqisi2
  340 01a6 13F0080F 		tst	r3, #8
  341 01aa 00F08B80 		beq	.L19
- 268:main.c        ****             {
- 269:main.c        ****              
- 270:main.c        ****             error = I2C_Peripheral_ReadRegisterMulti(LIS3DH_DEVICE_ADDRESS,
- 342              		.loc 1 270 0 is_stmt 1
+ 266:main.c        ****             {
+ 267:main.c        ****              
+ 268:main.c        ****             error = I2C_Peripheral_ReadRegisterMulti(LIS3DH_DEVICE_ADDRESS,
+ 342              		.loc 1 268 0 is_stmt 1
  343 01ae 6B46     		mov	r3, sp
  344 01b0 0622     		movs	r2, #6
  345 01b2 2821     		movs	r1, #40
@@ -652,32 +650,32 @@ ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 1
  347              	.LVL63:
  348 01b6 FFF7FEFF 		bl	I2C_Peripheral_ReadRegisterMulti
  349              	.LVL64:
- 271:main.c        ****                                                  LIS3DH_OUT_X_L,6,
- 272:main.c        ****                                                  &acc[0]);
- 273:main.c        ****         
- 274:main.c        ****        
- 275:main.c        ****                 if(error == NO_ERROR)
- 350              		.loc 1 275 0
-ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 12
-
-
+ 269:main.c        ****                                                  LIS3DH_OUT_X_L,6,
+ 270:main.c        ****                                                  &acc[0]);
+ 271:main.c        ****         
+ 272:main.c        ****        
+ 273:main.c        ****                 if(error == NO_ERROR)
+ 350              		.loc 1 273 0
  351 01ba 0028     		cmp	r0, #0
  352 01bc 40F08280 		bne	.L19
- 276:main.c        ****                 {
+ARM GAS  C:\Users\Susanna\AppData\Local\Temp\ccldr8Fd.s 			page 12
+
+
+ 274:main.c        ****                 {
+ 275:main.c        ****                     /******************************************/
+ 276:main.c        ****                     /*               Acc_X                    */
  277:main.c        ****                     /******************************************/
- 278:main.c        ****                     /*               Acc_X                    */
- 279:main.c        ****                     /******************************************/
- 280:main.c        ****                     Out_accX = (int16)((acc[0] | (acc[1]<<8)))>>4;
- 353              		.loc 1 280 0
+ 278:main.c        ****                     Out_accX = (int16)((acc[0] | (acc[1]<<8)))>>4;
+ 353              		.loc 1 278 0
  354 01c0 9DF80030 		ldrb	r3, [sp]	@ zero_extendqisi2
  355 01c4 9DF80100 		ldrb	r0, [sp, #1]	@ zero_extendqisi2
  356              	.LVL65:
  357 01c8 43EA0020 		orr	r0, r3, r0, lsl #8
  358              	.LVL66:
- 281:main.c        ****                     
- 282:main.c        ****                     /*cast to a floating point in m/s^2 units (sensitivity=2mg/digit)*/
- 283:main.c        ****                     Out_accX2= (float32)Out_accX*G*SENSITIVITY;
- 359              		.loc 1 283 0
+ 279:main.c        ****                     
+ 280:main.c        ****                     /*cast to a floating point in m/s^2 units (sensitivity=2mg/digit)*/
+ 281:main.c        ****                     Out_accX2= (float32)Out_accX*G*SENSITIVITY;
+ 359              		.loc 1 281 0
  360 01cc 40F30B10 		sbfx	r0, r0, #4, #12
  361              	.LVL67:
  362 01d0 FFF7FEFF 		bl	__aeabi_i2f
@@ -694,50 +692,50 @@ ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 1
  373              	.LVL71:
  374 01ec FFF7FEFF 		bl	__aeabi_d2f
  375              	.LVL72:
- 284:main.c        ****                     
- 285:main.c        ****                     /*multiplication by a factor of 10000 to keep 4 decimals and cast to int32*/
- 286:main.c        ****                     interoX=(int32) (Out_accX2*DECIMALS);    
- 376              		.loc 1 286 0
+ 282:main.c        ****                     
+ 283:main.c        ****                     /*multiplication by a factor of 10000 to keep 4 decimals and cast to int32*/
+ 284:main.c        ****                     interoX=(int32) (Out_accX2*DECIMALS);    
+ 376              		.loc 1 284 0
  377 01f0 4B49     		ldr	r1, .L22+80
  378 01f2 FFF7FEFF 		bl	__aeabi_fmul
  379              	.LVL73:
  380 01f6 FFF7FEFF 		bl	__aeabi_f2iz
  381              	.LVL74:
- 287:main.c        ****                     
- 288:main.c        ****                     /*divide the int32 in 4 bytes */ 
- 289:main.c        ****                     OutArray[1]=(uint8_t)(interoX & 0xFF);
- 382              		.loc 1 289 0
+ 285:main.c        ****                     
+ 286:main.c        ****                     /*divide the int32 in 4 bytes */ 
+ 287:main.c        ****                     OutArray[1]=(uint8_t)(interoX & 0xFF);
+ 382              		.loc 1 287 0
  383 01fa 8DF80900 		strb	r0, [sp, #9]
- 290:main.c        ****                     OutArray[2]=(uint8_t)((interoX >> 8)& 0xFF);
- 384              		.loc 1 290 0
+ 288:main.c        ****                     OutArray[2]=(uint8_t)((interoX >> 8)& 0xFF);
+ 384              		.loc 1 288 0
  385 01fe C0F30723 		ubfx	r3, r0, #8, #8
  386 0202 8DF80A30 		strb	r3, [sp, #10]
- 291:main.c        ****                     OutArray[3]=(uint8_t)((interoX >> 16)& 0xFF);
- 387              		.loc 1 291 0
+ 289:main.c        ****                     OutArray[3]=(uint8_t)((interoX >> 16)& 0xFF);
+ 387              		.loc 1 289 0
  388 0206 C0F30743 		ubfx	r3, r0, #16, #8
  389 020a 8DF80B30 		strb	r3, [sp, #11]
- 292:main.c        ****                     OutArray[4]=(uint8_t)(interoX >> 24);
- 390              		.loc 1 292 0
-ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 13
-
-
+ 290:main.c        ****                     OutArray[4]=(uint8_t)(interoX >> 24);
+ 390              		.loc 1 290 0
  391 020e 000E     		lsrs	r0, r0, #24
  392              	.LVL75:
+ARM GAS  C:\Users\Susanna\AppData\Local\Temp\ccldr8Fd.s 			page 13
+
+
  393 0210 8DF80C00 		strb	r0, [sp, #12]
- 293:main.c        ****                     
+ 291:main.c        ****                     
+ 292:main.c        ****                     /******************************************/
+ 293:main.c        ****                     /*               Acc_Y                    */
  294:main.c        ****                     /******************************************/
- 295:main.c        ****                     /*               Acc_Y                    */
- 296:main.c        ****                     /******************************************/
- 297:main.c        ****                     Out_accY = (int16)((acc[2] | (acc[3]<<8)))>>4;
- 394              		.loc 1 297 0
+ 295:main.c        ****                     Out_accY = (int16)((acc[2] | (acc[3]<<8)))>>4;
+ 394              		.loc 1 295 0
  395 0214 9DF80230 		ldrb	r3, [sp, #2]	@ zero_extendqisi2
  396 0218 9DF80300 		ldrb	r0, [sp, #3]	@ zero_extendqisi2
  397 021c 43EA0020 		orr	r0, r3, r0, lsl #8
  398              	.LVL76:
- 298:main.c        ****                     
- 299:main.c        ****                     /*cast to a floating point in m/s^2 units (sensitivity=2mg/digit)*/
- 300:main.c        ****                     Out_accY2= (float32)Out_accY*G*SENSITIVITY;
- 399              		.loc 1 300 0
+ 296:main.c        ****                     
+ 297:main.c        ****                     /*cast to a floating point in m/s^2 units (sensitivity=2mg/digit)*/
+ 298:main.c        ****                     Out_accY2= (float32)Out_accY*G*SENSITIVITY;
+ 399              		.loc 1 298 0
  400 0220 40F30B10 		sbfx	r0, r0, #4, #12
  401              	.LVL77:
  402 0224 FFF7FEFF 		bl	__aeabi_i2f
@@ -754,50 +752,50 @@ ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 1
  413              	.LVL81:
  414 0240 FFF7FEFF 		bl	__aeabi_d2f
  415              	.LVL82:
- 301:main.c        ****                     
- 302:main.c        ****                     /*multiplication by a factor of 10000 to keep 4 decimals and cast to int32*/
- 303:main.c        ****                     interoY=(int32) (Out_accY2*DECIMALS); 
- 416              		.loc 1 303 0
+ 299:main.c        ****                     
+ 300:main.c        ****                     /*multiplication by a factor of 10000 to keep 4 decimals and cast to int32*/
+ 301:main.c        ****                     interoY=(int32) (Out_accY2*DECIMALS); 
+ 416              		.loc 1 301 0
  417 0244 3649     		ldr	r1, .L22+80
  418 0246 FFF7FEFF 		bl	__aeabi_fmul
  419              	.LVL83:
  420 024a FFF7FEFF 		bl	__aeabi_f2iz
  421              	.LVL84:
- 304:main.c        ****                     
- 305:main.c        ****                     /*divide the int32 in 4 bytes */
- 306:main.c        ****                     OutArray[5]=(uint8_t)(interoY & 0xFF);
- 422              		.loc 1 306 0
+ 302:main.c        ****                     
+ 303:main.c        ****                     /*divide the int32 in 4 bytes */
+ 304:main.c        ****                     OutArray[5]=(uint8_t)(interoY & 0xFF);
+ 422              		.loc 1 304 0
  423 024e 8DF80D00 		strb	r0, [sp, #13]
- 307:main.c        ****                     OutArray[6]=(uint8_t)((interoY >> 8)& 0xFF);
- 424              		.loc 1 307 0
+ 305:main.c        ****                     OutArray[6]=(uint8_t)((interoY >> 8)& 0xFF);
+ 424              		.loc 1 305 0
  425 0252 C0F30723 		ubfx	r3, r0, #8, #8
  426 0256 8DF80E30 		strb	r3, [sp, #14]
- 308:main.c        ****                     OutArray[7]=(uint8_t)((interoY >> 16)& 0xFF);
- 427              		.loc 1 308 0
+ 306:main.c        ****                     OutArray[7]=(uint8_t)((interoY >> 16)& 0xFF);
+ 427              		.loc 1 306 0
  428 025a C0F30743 		ubfx	r3, r0, #16, #8
  429 025e 8DF80F30 		strb	r3, [sp, #15]
- 309:main.c        ****                     OutArray[8]=(uint8_t)(interoY >> 24);
- 430              		.loc 1 309 0
-ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 14
-
-
+ 307:main.c        ****                     OutArray[8]=(uint8_t)(interoY >> 24);
+ 430              		.loc 1 307 0
  431 0262 000E     		lsrs	r0, r0, #24
  432              	.LVL85:
+ARM GAS  C:\Users\Susanna\AppData\Local\Temp\ccldr8Fd.s 			page 14
+
+
  433 0264 8DF81000 		strb	r0, [sp, #16]
- 310:main.c        ****                     
+ 308:main.c        ****                     
+ 309:main.c        ****                     /******************************************/
+ 310:main.c        ****                     /*               Acc_Z                    */
  311:main.c        ****                     /******************************************/
- 312:main.c        ****                     /*               Acc_Z                    */
- 313:main.c        ****                     /******************************************/
- 314:main.c        ****                     Out_accZ = (int16)((acc[4] | (acc[5]<<8)))>>4;
- 434              		.loc 1 314 0
+ 312:main.c        ****                     Out_accZ = (int16)((acc[4] | (acc[5]<<8)))>>4;
+ 434              		.loc 1 312 0
  435 0268 9DF80430 		ldrb	r3, [sp, #4]	@ zero_extendqisi2
  436 026c 9DF80500 		ldrb	r0, [sp, #5]	@ zero_extendqisi2
  437 0270 43EA0020 		orr	r0, r3, r0, lsl #8
  438              	.LVL86:
- 315:main.c        ****                     
- 316:main.c        ****                     /*cast to a floating point in m/s^2 units (sensitivity=2mg/digit)*/
- 317:main.c        ****                     Out_accZ2= (float32)Out_accZ*G*SENSITIVITY;
- 439              		.loc 1 317 0
+ 313:main.c        ****                     
+ 314:main.c        ****                     /*cast to a floating point in m/s^2 units (sensitivity=2mg/digit)*/
+ 315:main.c        ****                     Out_accZ2= (float32)Out_accZ*G*SENSITIVITY;
+ 439              		.loc 1 315 0
  440 0274 40F30B10 		sbfx	r0, r0, #4, #12
  441              	.LVL87:
  442 0278 FFF7FEFF 		bl	__aeabi_i2f
@@ -814,57 +812,57 @@ ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 1
  453              	.LVL91:
  454 0294 FFF7FEFF 		bl	__aeabi_d2f
  455              	.LVL92:
- 318:main.c        ****                     
- 319:main.c        ****                     /*multiplication by a factor of 10000 to keep 4 decimals and cast to int32*/
- 320:main.c        ****                     interoZ=(int32) (Out_accZ2*DECIMALS);
- 456              		.loc 1 320 0
+ 316:main.c        ****                     
+ 317:main.c        ****                     /*multiplication by a factor of 10000 to keep 4 decimals and cast to int32*/
+ 318:main.c        ****                     interoZ=(int32) (Out_accZ2*DECIMALS);
+ 456              		.loc 1 318 0
  457 0298 2149     		ldr	r1, .L22+80
  458 029a FFF7FEFF 		bl	__aeabi_fmul
  459              	.LVL93:
  460 029e FFF7FEFF 		bl	__aeabi_f2iz
  461              	.LVL94:
- 321:main.c        ****                     
- 322:main.c        ****                     /*divide the int32 in 4 bytes */
- 323:main.c        ****                     OutArray[9]=(uint8_t)(interoZ & 0xFF);
- 462              		.loc 1 323 0
+ 319:main.c        ****                     
+ 320:main.c        ****                     /*divide the int32 in 4 bytes */
+ 321:main.c        ****                     OutArray[9]=(uint8_t)(interoZ & 0xFF);
+ 462              		.loc 1 321 0
  463 02a2 8DF81100 		strb	r0, [sp, #17]
- 324:main.c        ****                     OutArray[10]=(uint8_t)((interoZ >> 8)& 0xFF);
- 464              		.loc 1 324 0
+ 322:main.c        ****                     OutArray[10]=(uint8_t)((interoZ >> 8)& 0xFF);
+ 464              		.loc 1 322 0
  465 02a6 C0F30723 		ubfx	r3, r0, #8, #8
  466 02aa 8DF81230 		strb	r3, [sp, #18]
- 325:main.c        ****                     OutArray[11]=(uint8_t)((interoZ >> 16)& 0xFF);
- 467              		.loc 1 325 0
+ 323:main.c        ****                     OutArray[11]=(uint8_t)((interoZ >> 16)& 0xFF);
+ 467              		.loc 1 323 0
  468 02ae C0F30743 		ubfx	r3, r0, #16, #8
  469 02b2 8DF81330 		strb	r3, [sp, #19]
- 326:main.c        ****                     OutArray[12]=(uint8_t)(interoZ >> 24);
- 470              		.loc 1 326 0
-ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 15
-
-
+ 324:main.c        ****                     OutArray[12]=(uint8_t)(interoZ >> 24);
+ 470              		.loc 1 324 0
  471 02b6 000E     		lsrs	r0, r0, #24
  472              	.LVL95:
+ARM GAS  C:\Users\Susanna\AppData\Local\Temp\ccldr8Fd.s 			page 15
+
+
  473 02b8 8DF81400 		strb	r0, [sp, #20]
- 327:main.c        ****                     
- 328:main.c        ****                     /*send bytes to be plotted to Bridge Contol Panel*/
- 329:main.c        ****                     UART_Debug_PutArray(OutArray, 14);
- 474              		.loc 1 329 0
+ 325:main.c        ****                     
+ 326:main.c        ****                     /*send bytes to be plotted to Bridge Contol Panel*/
+ 327:main.c        ****                     UART_Debug_PutArray(OutArray, 14);
+ 474              		.loc 1 327 0
  475 02bc 0E21     		movs	r1, #14
  476 02be 02A8     		add	r0, sp, #8
  477 02c0 FFF7FEFF 		bl	UART_Debug_PutArray
  478              	.LVL96:
  479              	.L19:
- 330:main.c        ****                     
- 331:main.c        ****                     
- 332:main.c        ****                 }
- 333:main.c        ****             }
- 334:main.c        ****         }
- 335:main.c        ****         flag_ISR=0;
- 480              		.loc 1 335 0
+ 328:main.c        ****                     
+ 329:main.c        ****                     
+ 330:main.c        ****                 }
+ 331:main.c        ****             }
+ 332:main.c        ****         }
+ 333:main.c        ****         flag_ISR=0;
+ 480              		.loc 1 333 0
  481 02c4 0022     		movs	r2, #0
  482 02c6 074B     		ldr	r3, .L22+20
  483 02c8 1A70     		strb	r2, [r3]
- 336:main.c        ****     }
- 484              		.loc 1 336 0
+ 334:main.c        ****     }
+ 484              		.loc 1 334 0
  485 02ca 5BE7     		b	.L20
  486              	.L23:
  487 02cc AFF30080 		.align	3
@@ -898,11 +896,11 @@ ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 1
  515              		.align	2
  516              	.LC0:
  517 0000 44657669 		.ascii	"Device 0x%02X is connected\015\012\000"
-ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 16
-
-
  517      63652030 
  517      78253032 
+ARM GAS  C:\Users\Susanna\AppData\Local\Temp\ccldr8Fd.s 			page 16
+
+
  517      58206973 
  517      20636F6E 
  518 001d 000000   		.space	3
@@ -958,11 +956,11 @@ ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 1
  538      77207661 
  538      6C756573 
  539 0139 000000   		.space	3
-ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 17
-
-
  540              	.LC8:
  541 013c 434F4E54 		.ascii	"CONTROL REGISTER 1 successfully written as: 0x%02X\015"
+ARM GAS  C:\Users\Susanna\AppData\Local\Temp\ccldr8Fd.s 			page 17
+
+
  541      524F4C20 
  541      52454749 
  541      53544552 
@@ -1018,11 +1016,11 @@ ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 1
  568              		.file 6 "Generated_Source\\PSoC5/core_cm3.h"
  569              		.file 7 "InterruptRoutines.h"
  570              		.file 8 "I2C_Interface.h"
-ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 18
-
-
  571              		.file 9 "c:\\program files (x86)\\cypress\\psoc creator\\4.3\\psoc creator\\import\\gnu\\arm\\5.4.
  572              		.file 10 "Generated_Source\\PSoC5/UART_Debug.h"
+ARM GAS  C:\Users\Susanna\AppData\Local\Temp\ccldr8Fd.s 			page 18
+
+
  573              		.file 11 "Generated_Source\\PSoC5/Timer.h"
  574              		.file 12 "Generated_Source\\PSoC5/isr_ADC.h"
  575              		.file 13 "Generated_Source\\PSoC5/CyLib.h"
@@ -1078,11 +1076,11 @@ ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 1
  625 0069 02       		.uleb128 0x2
  626 006a 04       		.byte	0x4
  627 006b 07       		.byte	0x7
-ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 19
-
-
  628 006c D0010000 		.4byte	.LASF8
  629 0070 02       		.uleb128 0x2
+ARM GAS  C:\Users\Susanna\AppData\Local\Temp\ccldr8Fd.s 			page 19
+
+
  630 0071 08       		.byte	0x8
  631 0072 05       		.byte	0x5
  632 0073 DA000000 		.4byte	.LASF9
@@ -1138,11 +1136,11 @@ ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 1
  682 00df 04       		.byte	0x4
  683 00e0 D4000000 		.4byte	.LASF19
  684 00e4 02       		.uleb128 0x2
-ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 20
-
-
  685 00e5 08       		.byte	0x8
  686 00e6 04       		.byte	0x4
+ARM GAS  C:\Users\Susanna\AppData\Local\Temp\ccldr8Fd.s 			page 20
+
+
  687 00e7 81020000 		.4byte	.LASF20
  688 00eb 02       		.uleb128 0x2
  689 00ec 01       		.byte	0x1
@@ -1179,7 +1177,7 @@ ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 1
  720 0129 09       		.uleb128 0x9
  721 012a 9D000000 		.4byte	.LASF62
  722 012e 01       		.byte	0x1
- 723 012f 46       		.byte	0x46
+ 723 012f 44       		.byte	0x44
  724 0130 7E000000 		.4byte	0x7e
  725 0134 00000000 		.4byte	.LFB64
  726 0138 24030000 		.4byte	.LFE64-.LFB64
@@ -1189,7 +1187,7 @@ ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 1
  730 0142 0A       		.uleb128 0xa
  731 0143 73020000 		.4byte	.LASF27
  732 0147 01       		.byte	0x1
- 733 0148 55       		.byte	0x55
+ 733 0148 53       		.byte	0x53
  734 0149 4E060000 		.4byte	0x64e
  735 014d 02       		.uleb128 0x2
  736 014e 91       		.byte	0x91
@@ -1197,24 +1195,24 @@ ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 1
  738 0150 0A       		.uleb128 0xa
  739 0151 B7000000 		.4byte	.LASF28
  740 0155 01       		.byte	0x1
- 741 0156 68       		.byte	0x68
-ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 21
-
-
+ 741 0156 66       		.byte	0x66
  742 0157 8C000000 		.4byte	0x8c
  743 015b 02       		.uleb128 0x2
+ARM GAS  C:\Users\Susanna\AppData\Local\Temp\ccldr8Fd.s 			page 21
+
+
  744 015c 91       		.byte	0x91
  745 015d 43       		.sleb128 -61
  746 015e 0B       		.uleb128 0xb
  747 015f DF020000 		.4byte	.LASF29
  748 0163 01       		.byte	0x1
- 749 0164 69       		.byte	0x69
+ 749 0164 67       		.byte	0x67
  750 0165 10010000 		.4byte	0x110
  751 0169 00000000 		.4byte	.LLST0
  752 016d 0A       		.uleb128 0xa
  753 016e C4000000 		.4byte	.LASF30
  754 0172 01       		.byte	0x1
- 755 0173 78       		.byte	0x78
+ 755 0173 76       		.byte	0x76
  756 0174 8C000000 		.4byte	0x8c
  757 0178 02       		.uleb128 0x2
  758 0179 91       		.byte	0x91
@@ -1222,7 +1220,7 @@ ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 1
  760 017b 0A       		.uleb128 0xa
  761 017c 00000000 		.4byte	.LASF31
  762 0180 01       		.byte	0x1
- 763 0181 8A       		.byte	0x8a
+ 763 0181 88       		.byte	0x88
  764 0182 8C000000 		.4byte	0x8c
  765 0186 02       		.uleb128 0x2
  766 0187 91       		.byte	0x91
@@ -1230,7 +1228,7 @@ ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 1
  768 0189 0A       		.uleb128 0xa
  769 018a 1F000000 		.4byte	.LASF32
  770 018e 01       		.byte	0x1
- 771 018f CB       		.byte	0xcb
+ 771 018f C9       		.byte	0xc9
  772 0190 8C000000 		.4byte	0x8c
  773 0194 02       		.uleb128 0x2
  774 0195 91       		.byte	0x91
@@ -1238,58 +1236,58 @@ ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 1
  776 0197 0B       		.uleb128 0xb
  777 0198 88020000 		.4byte	.LASF33
  778 019c 01       		.byte	0x1
- 779 019d F1       		.byte	0xf1
+ 779 019d EF       		.byte	0xef
  780 019e 97000000 		.4byte	0x97
  781 01a2 B8000000 		.4byte	.LLST1
  782 01a6 0B       		.uleb128 0xb
  783 01a7 E8000000 		.4byte	.LASF34
  784 01ab 01       		.byte	0x1
- 785 01ac F2       		.byte	0xf2
+ 785 01ac F0       		.byte	0xf0
  786 01ad D1000000 		.4byte	0xd1
  787 01b1 F1000000 		.4byte	.LLST2
  788 01b5 0B       		.uleb128 0xb
  789 01b6 91020000 		.4byte	.LASF35
  790 01ba 01       		.byte	0x1
- 791 01bb F3       		.byte	0xf3
+ 791 01bb F1       		.byte	0xf1
  792 01bc 97000000 		.4byte	0x97
  793 01c0 04010000 		.4byte	.LLST3
  794 01c4 0B       		.uleb128 0xb
  795 01c5 0A020000 		.4byte	.LASF36
  796 01c9 01       		.byte	0x1
- 797 01ca F4       		.byte	0xf4
+ 797 01ca F2       		.byte	0xf2
  798 01cb D1000000 		.4byte	0xd1
-ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 22
-
-
  799 01cf 3D010000 		.4byte	.LLST4
  800 01d3 0B       		.uleb128 0xb
+ARM GAS  C:\Users\Susanna\AppData\Local\Temp\ccldr8Fd.s 			page 22
+
+
  801 01d4 9A020000 		.4byte	.LASF37
  802 01d8 01       		.byte	0x1
- 803 01d9 F5       		.byte	0xf5
+ 803 01d9 F3       		.byte	0xf3
  804 01da 97000000 		.4byte	0x97
  805 01de 50010000 		.4byte	.LLST5
  806 01e2 0B       		.uleb128 0xb
  807 01e3 D5020000 		.4byte	.LASF38
  808 01e7 01       		.byte	0x1
- 809 01e8 F6       		.byte	0xf6
+ 809 01e8 F4       		.byte	0xf4
  810 01e9 D1000000 		.4byte	0xd1
  811 01ed 89010000 		.4byte	.LLST6
  812 01f1 0C       		.uleb128 0xc
  813 01f2 A2000000 		.4byte	.LASF39
  814 01f6 01       		.byte	0x1
- 815 01f7 F7       		.byte	0xf7
+ 815 01f7 F5       		.byte	0xf5
  816 01f8 8C000000 		.4byte	0x8c
  817 01fc A07F     		.sleb128 -96
  818 01fe 0C       		.uleb128 0xc
  819 01ff A3020000 		.4byte	.LASF40
  820 0203 01       		.byte	0x1
- 821 0204 F8       		.byte	0xf8
+ 821 0204 F6       		.byte	0xf6
  822 0205 8C000000 		.4byte	0x8c
  823 0209 40       		.sleb128 -64
  824 020a 0A       		.uleb128 0xa
  825 020b 29000000 		.4byte	.LASF41
  826 020f 01       		.byte	0x1
- 827 0210 F9       		.byte	0xf9
+ 827 0210 F7       		.byte	0xf7
  828 0211 5E060000 		.4byte	0x65e
  829 0215 03       		.uleb128 0x3
  830 0216 91       		.byte	0x91
@@ -1297,7 +1295,7 @@ ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 1
  832 0219 0D       		.uleb128 0xd
  833 021a 61636300 		.ascii	"acc\000"
  834 021e 01       		.byte	0x1
- 835 021f FA       		.byte	0xfa
+ 835 021f F8       		.byte	0xf8
  836 0220 6E060000 		.4byte	0x66e
  837 0224 03       		.uleb128 0x3
  838 0225 91       		.byte	0x91
@@ -1305,24 +1303,24 @@ ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 1
  840 0228 0B       		.uleb128 0xb
  841 0229 07010000 		.4byte	.LASF42
  842 022d 01       		.byte	0x1
- 843 022e FC       		.byte	0xfc
+ 843 022e FA       		.byte	0xfa
  844 022f C5000000 		.4byte	0xc5
  845 0233 9C010000 		.4byte	.LLST7
  846 0237 0B       		.uleb128 0xb
  847 0238 0F010000 		.4byte	.LASF43
  848 023c 01       		.byte	0x1
- 849 023d FD       		.byte	0xfd
+ 849 023d FB       		.byte	0xfb
  850 023e C5000000 		.4byte	0xc5
  851 0242 AF010000 		.4byte	.LLST8
  852 0246 0B       		.uleb128 0xb
  853 0247 17010000 		.4byte	.LASF44
  854 024b 01       		.byte	0x1
- 855 024c FE       		.byte	0xfe
-ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 23
-
-
+ 855 024c FC       		.byte	0xfc
  856 024d C5000000 		.4byte	0xc5
  857 0251 C2010000 		.4byte	.LLST9
+ARM GAS  C:\Users\Susanna\AppData\Local\Temp\ccldr8Fd.s 			page 23
+
+
  858 0255 0E       		.uleb128 0xe
  859 0256 24000000 		.4byte	.LBB2
  860 025a 20000000 		.4byte	.LBE2-.LBB2
@@ -1330,7 +1328,7 @@ ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 1
  862 0262 0F       		.uleb128 0xf
  863 0263 6900     		.ascii	"i\000"
  864 0265 01       		.byte	0x1
- 865 0266 58       		.byte	0x58
+ 865 0266 56       		.byte	0x56
  866 0267 7E000000 		.4byte	0x7e
  867 026b D5010000 		.4byte	.LLST10
  868 026f 10       		.uleb128 0x10
@@ -1378,11 +1376,11 @@ ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 1
  910 02b4 44       		.sleb128 -60
  911 02b5 00       		.byte	0
  912 02b6 00       		.byte	0
-ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 24
-
-
  913 02b7 13       		.uleb128 0x13
  914 02b8 0A000000 		.4byte	.LVL0
+ARM GAS  C:\Users\Susanna\AppData\Local\Temp\ccldr8Fd.s 			page 24
+
+
  915 02bc C1060000 		.4byte	0x6c1
  916 02c0 13       		.uleb128 0x13
  917 02c1 10000000 		.4byte	.LVL1
@@ -1438,11 +1436,11 @@ ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 1
  967 0320 01       		.uleb128 0x1
  968 0321 51       		.byte	0x51
  969 0322 05       		.uleb128 0x5
-ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 25
-
-
  970 0323 03       		.byte	0x3
  971 0324 20000000 		.4byte	.LC1
+ARM GAS  C:\Users\Susanna\AppData\Local\Temp\ccldr8Fd.s 			page 25
+
+
  972 0328 00       		.byte	0
  973 0329 10       		.uleb128 0x10
  974 032a 64000000 		.4byte	.LVL13
@@ -1498,11 +1496,11 @@ ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 1
  1024 0383 02       		.uleb128 0x2
  1025 0384 91       		.byte	0x91
  1026 0385 44       		.sleb128 -60
-ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 26
-
-
  1027 0386 11       		.uleb128 0x11
  1028 0387 01       		.uleb128 0x1
+ARM GAS  C:\Users\Susanna\AppData\Local\Temp\ccldr8Fd.s 			page 26
+
+
  1029 0388 51       		.byte	0x51
  1030 0389 05       		.uleb128 0x5
  1031 038a 03       		.byte	0x3
@@ -1558,11 +1556,11 @@ ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 1
  1081 03e3 F7030000 		.4byte	0x3f7
  1082 03e7 11       		.uleb128 0x11
  1083 03e8 01       		.uleb128 0x1
-ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 27
-
-
  1084 03e9 50       		.byte	0x50
  1085 03ea 02       		.uleb128 0x2
+ARM GAS  C:\Users\Susanna\AppData\Local\Temp\ccldr8Fd.s 			page 27
+
+
  1086 03eb 91       		.byte	0x91
  1087 03ec 44       		.sleb128 -60
  1088 03ed 11       		.uleb128 0x11
@@ -1618,11 +1616,11 @@ ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 1
  1138 044c 01       		.uleb128 0x1
  1139 044d 51       		.byte	0x51
  1140 044e 02       		.uleb128 0x2
-ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 28
-
-
  1141 044f 08       		.byte	0x8
  1142 0450 20       		.byte	0x20
+ARM GAS  C:\Users\Susanna\AppData\Local\Temp\ccldr8Fd.s 			page 28
+
+
  1143 0451 11       		.uleb128 0x11
  1144 0452 01       		.uleb128 0x1
  1145 0453 52       		.byte	0x52
@@ -1678,11 +1676,11 @@ ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 1
  1195 04af 50       		.byte	0x50
  1196 04b0 01       		.uleb128 0x1
  1197 04b1 48       		.byte	0x48
-ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 29
-
-
  1198 04b2 11       		.uleb128 0x11
  1199 04b3 01       		.uleb128 0x1
+ARM GAS  C:\Users\Susanna\AppData\Local\Temp\ccldr8Fd.s 			page 29
+
+
  1200 04b4 51       		.byte	0x51
  1201 04b5 02       		.uleb128 0x2
  1202 04b6 08       		.byte	0x8
@@ -1738,11 +1736,11 @@ ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 1
  1252 050c F8060000 		.4byte	0x6f8
  1253 0510 26050000 		.4byte	0x526
  1254 0514 11       		.uleb128 0x11
-ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 30
-
-
  1255 0515 01       		.uleb128 0x1
  1256 0516 50       		.byte	0x50
+ARM GAS  C:\Users\Susanna\AppData\Local\Temp\ccldr8Fd.s 			page 30
+
+
  1257 0517 01       		.uleb128 0x1
  1258 0518 48       		.byte	0x48
  1259 0519 11       		.uleb128 0x11
@@ -1798,11 +1796,11 @@ ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 1
  1309 0569 08020000 		.4byte	.LC12
  1310 056d 00       		.byte	0
  1311 056e 10       		.uleb128 0x10
-ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 31
-
-
  1312 056f 52010000 		.4byte	.LVL54
  1313 0573 03070000 		.4byte	0x703
+ARM GAS  C:\Users\Susanna\AppData\Local\Temp\ccldr8Fd.s 			page 31
+
+
  1314 0577 8D050000 		.4byte	0x58d
  1315 057b 11       		.uleb128 0x11
  1316 057c 01       		.uleb128 0x1
@@ -1858,11 +1856,11 @@ ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 1
  1366 05c0 01       		.uleb128 0x1
  1367 05c1 51       		.byte	0x51
  1368 05c2 05       		.uleb128 0x5
-ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 32
-
-
  1369 05c3 03       		.byte	0x3
  1370 05c4 44020000 		.4byte	.LC13
+ARM GAS  C:\Users\Susanna\AppData\Local\Temp\ccldr8Fd.s 			page 32
+
+
  1371 05c8 00       		.byte	0
  1372 05c9 10       		.uleb128 0x10
  1373 05ca 70010000 		.4byte	.LVL58
@@ -1918,11 +1916,11 @@ ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 1
  1423 0623 01       		.uleb128 0x1
  1424 0624 48       		.byte	0x48
  1425 0625 11       		.uleb128 0x11
-ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 33
-
-
  1426 0626 01       		.uleb128 0x1
  1427 0627 51       		.byte	0x51
+ARM GAS  C:\Users\Susanna\AppData\Local\Temp\ccldr8Fd.s 			page 33
+
+
  1428 0628 02       		.uleb128 0x2
  1429 0629 08       		.byte	0x8
  1430 062a 28       		.byte	0x28
@@ -1978,11 +1976,11 @@ ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 1
  1480 067e 16       		.uleb128 0x16
  1481 067f F9020000 		.4byte	.LASF45
  1482 0683 06       		.byte	0x6
-ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 34
-
-
  1483 0684 1207     		.2byte	0x712
  1484 0686 8A060000 		.4byte	0x68a
+ARM GAS  C:\Users\Susanna\AppData\Local\Temp\ccldr8Fd.s 			page 34
+
+
  1485 068a 06       		.uleb128 0x6
  1486 068b A2000000 		.4byte	0xa2
  1487 068f 17       		.uleb128 0x17
@@ -2038,11 +2036,11 @@ ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 1
  1537 06fd 57000000 		.4byte	.LASF55
  1538 0701 08       		.byte	0x8
  1539 0702 28       		.byte	0x28
-ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 35
-
-
  1540 0703 18       		.uleb128 0x18
  1541 0704 A6010000 		.4byte	.LASF56
+ARM GAS  C:\Users\Susanna\AppData\Local\Temp\ccldr8Fd.s 			page 35
+
+
  1542 0708 A6010000 		.4byte	.LASF56
  1543 070c 08       		.byte	0x8
  1544 070d 43       		.byte	0x43
@@ -2098,11 +2096,11 @@ ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 1
  1594 0024 0B       		.uleb128 0xb
  1595 0025 3B       		.uleb128 0x3b
  1596 0026 0B       		.uleb128 0xb
-ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 36
-
-
  1597 0027 49       		.uleb128 0x49
  1598 0028 13       		.uleb128 0x13
+ARM GAS  C:\Users\Susanna\AppData\Local\Temp\ccldr8Fd.s 			page 36
+
+
  1599 0029 00       		.byte	0
  1600 002a 00       		.byte	0
  1601 002b 04       		.uleb128 0x4
@@ -2158,11 +2156,11 @@ ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 1
  1651 005d 0E       		.uleb128 0xe
  1652 005e 1C       		.uleb128 0x1c
  1653 005f 0B       		.uleb128 0xb
-ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 37
-
-
  1654 0060 00       		.byte	0
  1655 0061 00       		.byte	0
+ARM GAS  C:\Users\Susanna\AppData\Local\Temp\ccldr8Fd.s 			page 37
+
+
  1656 0062 09       		.uleb128 0x9
  1657 0063 2E       		.uleb128 0x2e
  1658 0064 01       		.byte	0x1
@@ -2218,11 +2216,11 @@ ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 1
  1708 0098 0B       		.uleb128 0xb
  1709 0099 49       		.uleb128 0x49
  1710 009a 13       		.uleb128 0x13
-ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 38
-
-
  1711 009b 02       		.uleb128 0x2
  1712 009c 17       		.uleb128 0x17
+ARM GAS  C:\Users\Susanna\AppData\Local\Temp\ccldr8Fd.s 			page 38
+
+
  1713 009d 00       		.byte	0
  1714 009e 00       		.byte	0
  1715 009f 0C       		.uleb128 0xc
@@ -2278,11 +2276,11 @@ ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 1
  1765 00d1 49       		.uleb128 0x49
  1766 00d2 13       		.uleb128 0x13
  1767 00d3 02       		.uleb128 0x2
-ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 39
-
-
  1768 00d4 17       		.uleb128 0x17
  1769 00d5 00       		.byte	0
+ARM GAS  C:\Users\Susanna\AppData\Local\Temp\ccldr8Fd.s 			page 39
+
+
  1770 00d6 00       		.byte	0
  1771 00d7 10       		.uleb128 0x10
  1772 00d8 898201   		.uleb128 0x4109
@@ -2338,11 +2336,11 @@ ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 1
  1822 0113 13       		.uleb128 0x13
  1823 0114 2F       		.uleb128 0x2f
  1824 0115 0B       		.uleb128 0xb
-ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 40
-
-
  1825 0116 00       		.byte	0
  1826 0117 00       		.byte	0
+ARM GAS  C:\Users\Susanna\AppData\Local\Temp\ccldr8Fd.s 			page 40
+
+
  1827 0118 16       		.uleb128 0x16
  1828 0119 34       		.uleb128 0x34
  1829 011a 00       		.byte	0
@@ -2398,11 +2396,11 @@ ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 1
  1879              		.section	.debug_loc,"",%progbits
  1880              	.Ldebug_loc0:
  1881              	.LLST0:
-ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 41
-
-
  1882 0000 50000000 		.4byte	.LVL10
  1883 0004 5A000000 		.4byte	.LVL11
+ARM GAS  C:\Users\Susanna\AppData\Local\Temp\ccldr8Fd.s 			page 41
+
+
  1884 0008 0100     		.2byte	0x1
  1885 000a 50       		.byte	0x50
  1886 000b 66000000 		.4byte	.LVL14
@@ -2458,11 +2456,11 @@ ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 1
  1936 0097 0100     		.2byte	0x1
  1937 0099 50       		.byte	0x50
  1938 009a 9C010000 		.4byte	.LVL62
-ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 42
-
-
  1939 009e B6010000 		.4byte	.LVL63
  1940 00a2 0100     		.2byte	0x1
+ARM GAS  C:\Users\Susanna\AppData\Local\Temp\ccldr8Fd.s 			page 42
+
+
  1941 00a4 50       		.byte	0x50
  1942 00a5 BA010000 		.4byte	.LVL64
  1943 00a9 C8010000 		.4byte	.LVL65
@@ -2518,11 +2516,11 @@ ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 1
  1993 0104 20020000 		.4byte	.LVL76
  1994 0108 24020000 		.4byte	.LVL77
  1995 010c 0900     		.2byte	0x9
-ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 43
-
-
  1996 010e 70       		.byte	0x70
  1997 010f 00       		.sleb128 0
+ARM GAS  C:\Users\Susanna\AppData\Local\Temp\ccldr8Fd.s 			page 43
+
+
  1998 0110 09       		.byte	0x9
  1999 0111 F4       		.byte	0xf4
  2000 0112 24       		.byte	0x24
@@ -2578,11 +2576,11 @@ ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 1
  2050 0167 7B020000 		.4byte	.LVL88-1
  2051 016b 1400     		.2byte	0x14
  2052 016d 91       		.byte	0x91
-ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 44
-
-
  2053 016e AD7F     		.sleb128 -83
  2054 0170 94       		.byte	0x94
+ARM GAS  C:\Users\Susanna\AppData\Local\Temp\ccldr8Fd.s 			page 44
+
+
  2055 0171 01       		.byte	0x1
  2056 0172 08       		.byte	0x8
  2057 0173 FF       		.byte	0xff
@@ -2638,11 +2636,11 @@ ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 1
  2107 01e1 26000000 		.4byte	.LVL5
  2108 01e5 46010000 		.4byte	.LVL53
  2109 01e9 0100     		.2byte	0x1
-ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 45
-
-
  2110 01eb 54       		.byte	0x54
  2111 01ec 00000000 		.4byte	0
+ARM GAS  C:\Users\Susanna\AppData\Local\Temp\ccldr8Fd.s 			page 45
+
+
  2112 01f0 00000000 		.4byte	0
  2113              		.section	.debug_aranges,"",%progbits
  2114 0000 1C000000 		.4byte	0x1c
@@ -2698,11 +2696,11 @@ ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 1
  2146              	.LASF18:
  2147 0045 666C6F61 		.ascii	"float32\000"
  2147      74333200 
-ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 46
-
-
  2148              	.LASF4:
  2149 004d 73686F72 		.ascii	"short int\000"
+ARM GAS  C:\Users\Susanna\AppData\Local\Temp\ccldr8Fd.s 			page 46
+
+
  2149      7420696E 
  2149      7400
  2150              	.LASF55:
@@ -2758,11 +2756,11 @@ ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 1
  2174              	.LASF50:
  2175 00f2 54696D65 		.ascii	"Timer_Start\000"
  2175      725F5374 
-ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 47
-
-
  2175      61727400 
  2176              	.LASF7:
+ARM GAS  C:\Users\Susanna\AppData\Local\Temp\ccldr8Fd.s 			page 47
+
+
  2177 00fe 6C6F6E67 		.ascii	"long int\000"
  2177      20696E74 
  2177      00
@@ -2818,11 +2816,11 @@ ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 1
  2203      7369676E 
  2203      65642069 
  2204              	.LASF56:
-ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 48
-
-
  2205 01a6 4932435F 		.ascii	"I2C_Peripheral_WriteRegister\000"
  2205      50657269 
+ARM GAS  C:\Users\Susanna\AppData\Local\Temp\ccldr8Fd.s 			page 48
+
+
  2205      70686572 
  2205      616C5F57 
  2205      72697465 
@@ -2878,11 +2876,11 @@ ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 1
  2226      2E6300
  2227              	.LASF27:
  2228 0273 6D657373 		.ascii	"message\000"
-ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 49
-
-
  2228      61676500 
  2229              	.LASF17:
+ARM GAS  C:\Users\Susanna\AppData\Local\Temp\ccldr8Fd.s 			page 49
+
+
  2230 027b 696E7433 		.ascii	"int32\000"
  2230      3200
  2231              	.LASF20:
@@ -2938,11 +2936,11 @@ ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 1
  2254      00
  2255              	.LASF59:
  2256 0306 474E5520 		.ascii	"GNU C11 5.4.1 20160609 (release) [ARM/embedded-5-br"
-ARM GAS  C:\Users\Susanna\AppData\Local\Temp\cc25RDRT.s 			page 50
-
-
  2256      43313120 
  2256      352E342E 
+ARM GAS  C:\Users\Susanna\AppData\Local\Temp\ccldr8Fd.s 			page 50
+
+
  2256      31203230 
  2256      31363036 
  2257 0339 616E6368 		.ascii	"anch revision 237715] -mcpu=cortex-m3 -mthumb -g -O"

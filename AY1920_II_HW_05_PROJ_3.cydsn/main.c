@@ -5,8 +5,6 @@
 * to understand the I2C protocol and communicate with a
 * a I2C Slave device (LIS3DH Accelerometer).
 *
-* \author Gabriele Belotti
-* \date , 2020
 */
 
 // Include required header files
